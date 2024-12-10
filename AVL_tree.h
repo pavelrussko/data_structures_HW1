@@ -198,14 +198,34 @@ void AVL_Tree<T>::LR_rotation(TreeNode<T> *node) {
 
 // RR rotation function
 template<class T>
+template<class T>
 void AVL_Tree<T>::RR_rotation(TreeNode<T> *node) {
-    // Implementation of RR rotation function
+    TreeNode<T> *newRoot = node->right;
+    node->right = newRoot->left;
+    if (newRoot->left != nullptr) {
+        newRoot->left->parent = node;
+    }
+    newRoot->parent = node->parent;
+    if (node->parent == nullptr) {
+        root = newRoot;
+    } else if (node == node->parent->left) {
+        node->parent->left = newRoot;
+    } else {
+        node->parent->right = newRoot;
+    }
+    newRoot->left = node;
+    node->parent = newRoot;
+
+    // Update heights
+    updateHeight(node);
+    updateHeight(newRoot);
 }
 
 // RL rotation function
 template<class T>
-void AVL_Tree<T>::Rl_rotation(TreeNode<T> *node) {
-    // Implementation of RL rotation function
+void AVL_Tree<T>::RL_rotation(TreeNode<T> *node) {
+    LL_rotation(node->right);
+    RR_rotation(node);
 }
 
 
