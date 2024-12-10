@@ -25,7 +25,7 @@ public:
     void RR_rotation(TreeNode<T>*);
     void Rl_rotation(TreeNode<T>*);
     int get_BF(TreeNode<T>*);
-    void (*get_rotation(TreeNode<T>*))();
+    int max(int a, int b);
 };
 
 // Constructor for AVL_Tree
@@ -44,6 +44,7 @@ StatusType AVL_Tree<T>::insert(TreeNode<T> *node) {
     }
     int BF;
     node->parent = current;
+    node->height = 0;
     if(node->data > current){
         current->right = node;
     } else {
@@ -73,6 +74,7 @@ StatusType AVL_Tree<T>::insert(TreeNode<T> *node) {
                 }
             }
         }
+        current->height = 1 + max(current->left->height, current->right->height);
         current = current->parent;
     }
     return StatusType::SUCCESS;
@@ -81,13 +83,29 @@ StatusType AVL_Tree<T>::insert(TreeNode<T> *node) {
 // Search function
 template<class T>
 TreeNode<T> *AVL_Tree<T>::search(TreeNode<T> *node) {
-    // Implementation of search function
+    TreeNode<T>* current = root;
+    while((current->left && current->right) || (current->data != node->data)) {
+        if (node->data < current->data && current->left) {
+            current = current->left;
+        } else if(node->data > current->data && current->right){
+            current = current->right;
+        } else {
+            return current;
+        }
+    }
+    return current;
 }
 
 // Removal function
 template<class T>
 StatusType AVL_Tree<T>::removal(TreeNode<T> *node) {
-    // Implementation of removal function
+    if(node->data <= 0){
+        return StatusType::INVALID_INPUT;
+    }
+    if(find(node) != node){
+        return StatusType::FAILURE;
+    }
+
 }
 
 // Inorder traversal function
@@ -126,3 +144,8 @@ int AVL_Tree<T>::get_BF(TreeNode<T>* node) {
     return node->left->height - node->right->height;
 }
 
+template<class T>
+int AVL_Tree<T>::max(int a, int b){
+    if(a > b) return a;
+    return b;
+}
