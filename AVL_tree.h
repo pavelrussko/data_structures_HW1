@@ -126,6 +126,30 @@ StatusType AVL_Tree<T>::removal(TreeNode<T> *node) {
         node = replace;
 
     }
+    TreeNode<T> *parent = node->parent;
+    if (node->left) {
+        if (parent->left == node) {
+            parent->left = node->left;
+        } else {
+            parent->right = node->left;
+        }
+    } else if (node->right) {
+        if (parent->left == node) {
+            parent->left = node->right;
+        } else {
+            parent->right = node->right;
+        }
+    } else {
+        if (parent->left == node) {
+            parent->left = nullptr;
+        } else {
+            parent->right = nullptr;
+        }
+    }
+    delete node;
+
+    //need to balance trees.
+
 
 
 }
