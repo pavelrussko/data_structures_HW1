@@ -20,12 +20,12 @@ public:
     TreeNode<T> *search(TreeNode<T> *);
     StatusType removal(TreeNode<T> *);
     void inorder(TreeNode<T> *);
-    void LL_rotation();
-    void LR_rotation();
-    void RR_rotation();
-    void Rl_rotation();
-    int height_difference(TreeNode<T> *);
+    void LL_rotation(TreeNode<T>*);
+    void LR_rotation(TreeNode<T>*);
+    void RR_rotation(TreeNode<T>*);
+    void Rl_rotation(TreeNode<T>*);
     int get_BF(TreeNode<T>*);
+    void (*get_rotation(TreeNode<T>*))();
 };
 
 // Constructor for AVL_Tree
@@ -35,7 +35,47 @@ AVL_Tree<T>::AVL_Tree() : root(nullptr) {}
 // Insert function
 template<class T>
 StatusType AVL_Tree<T>::insert(TreeNode<T> *node) {
-    // Implementation of insert function
+    if(node->data < 0){
+        return StatusType::INVALID_INPUT;
+    }
+    TreeNode<T>* current = search(node);
+    if(current == node){
+        return StatusType::FAILURE;
+    }
+    int BF;
+    node->parent = current;
+    if(node->data > current){
+        current->right = node;
+    } else {
+        current->left = current;
+    }
+    while(current) {
+        BF = get_BF(current);
+        if (BF > 1 || BF < -1) {
+            int child_BF;
+            if (BF > 1) {
+                child_BF = get_BF(current->left);
+                if (child_BF >= 0) {
+                    LL_rotation(node);
+                    return StatusType::SUCCESS;
+                } else {
+                    LR_rotation(node);
+                    return StatusType::SUCCESS;
+                }
+            } else {
+                child_BF = get_BF(current->right);
+                if (child_BF <= 0) {
+                    RR_rotation(node);
+                    return StatusType::SUCCESS;
+                } else {
+                    Rl_rotation(node);
+                    return StatusType::SUCCESS;
+                }
+            }
+        }
+        current = current->parent;
+    }
+    return StatusType::SUCCESS;
 }
 
 // Search function
@@ -58,35 +98,31 @@ void AVL_Tree<T>::inorder(TreeNode<T> *node) {
 
 // LL rotation function
 template<class T>
-void AVL_Tree<T>::LL_rotation() {
+void AVL_Tree<T>::LL_rotation(TreeNode<T>* node) {
     // Implementation of LL rotation function
 }
 
 // LR rotation function
 template<class T>
-void AVL_Tree<T>::LR_rotation() {
+void AVL_Tree<T>::LR_rotation(TreeNode<T>* node) {
     // Implementation of LR rotation function
 }
 
 // RR rotation function
 template<class T>
-void AVL_Tree<T>::RR_rotation() {
+void AVL_Tree<T>::RR_rotation(TreeNode<T>* node) {
     // Implementation of RR rotation function
 }
 
 // RL rotation function
 template<class T>
-void AVL_Tree<T>::Rl_rotation() {
+void AVL_Tree<T>::Rl_rotation(TreeNode<T>* node) {
     // Implementation of RL rotation function
 }
 
-// Height difference function
-template<class T>
-int AVL_Tree<T>::height_difference(TreeNode<T> *node) {
-    // Implementation of height difference function
-}
 
 template<class T>
 int AVL_Tree<T>::get_BF(TreeNode<T>* node) {
     return node->left->height - node->right->height;
 }
+
