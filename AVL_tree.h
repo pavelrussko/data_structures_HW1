@@ -25,6 +25,7 @@ public:
     void RR_rotation();
     void Rl_rotation();
     int height_difference(TreeNode<T> *);
+    int get_BF(TreeNode<T>*);
 };
 
 // Constructor for AVL_Tree
@@ -83,4 +84,9 @@ void AVL_Tree<T>::Rl_rotation() {
 template<class T>
 int AVL_Tree<T>::height_difference(TreeNode<T> *node) {
     // Implementation of height difference function
+}
+
+template<class T>
+int AVL_Tree<T>::get_BF(TreeNode<T>* node) {
+    return node->left->height - node->right->height;
 }
