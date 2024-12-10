@@ -26,7 +26,21 @@ public:
     void Rl_rotation(TreeNode<T> *);
     int get_BF(TreeNode<T> *);
     int max(int a, int b);
+    void updateHeight(TreeNode<T> *);
 };
+
+template<class T>
+void updateHeight(TreeNode<T> *node) {
+    if (!node->left && !node->right) {
+        node->height = 0;
+    } else if (!node->left) {
+        node->height = node->right->height + 1;
+    } else if (!node->right) {
+        node->height = node->left->height + 1;
+    } else {
+        node->height = max(node->left->height, node->right->height) + 1;
+    }
+}
 
 // Constructor for AVL_Tree
 template<class T>
@@ -142,10 +156,30 @@ StatusType AVL_Tree<T>::removal(TreeNode<T> *node) {
         }
     }
     delete node;
-
-    // Need to balance trees.
-    // (Balancing code should be added here)
-
+    parent->height = setHeight(parent);
+    while (parent) {
+        int BF = get_BF(parent);
+        if (BF > 1 || BF < -1) {
+            int child_BF;
+            if (BF > 1) {
+                child_BF = get_BF(parent->left);
+                if (child_BF >= 0) {
+                    LL_rotation(parent);
+                } else {
+                    LR_rotation(parent);
+                }
+            } else {
+                child_BF = get_BF(parent->right);
+                if (child_BF <= 0) {
+                    RR_rotation(parent);
+                } else {
+                    Rl_rotation(parent);
+                }
+            }
+        }
+        parent->height = setHeight(parent);
+        parent = parent->parent;
+    }
     return StatusType::SUCCESS;
 }
 
@@ -182,6 +216,15 @@ void AVL_Tree<T>::Rl_rotation(TreeNode<T> *node) {
 
 template<class T>
 int AVL_Tree<T>::get_BF(TreeNode<T> *node) {
+    if (!node->left && !node->right) {
+        return 0;
+    }
+    if (!node->left) {
+        return -node->right->height;
+    }
+    if (!node->right) {
+        return node->left->height;
+    }
     return node->left->height - node->right->height;
 }
 
