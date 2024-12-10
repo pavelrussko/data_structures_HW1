@@ -30,16 +30,11 @@ public:
 };
 
 template<class T>
-void updateHeight(TreeNode<T> *node) {
-    if (!node->left && !node->right) {
-        node->height = 0;
-    } else if (!node->left) {
-        node->height = node->right->height + 1;
-    } else if (!node->right) {
-        node->height = node->left->height + 1;
-    } else {
-        node->height = max(node->left->height, node->right->height) + 1;
-    }
+void AVL_Tree<T>::updateHeight(TreeNode<T> *node) {
+    if (node == nullptr) return;
+    int leftHeight = (node->left) ? node->left->height : -1;
+    int rightHeight = (node->right) ? node->right->height : -1;
+    node->height = 1 + max(leftHeight, rightHeight);
 }
 
 // Constructor for AVL_Tree
