@@ -97,7 +97,6 @@ TreeNode<T> *AVL_Tree<T>::search(TreeNode<T> *node) {
     return current;
 }
 
-// Removal function
 template<class T>
 StatusType AVL_Tree<T>::removal(TreeNode<T> *node) {
     if (node->data <= 0) {
@@ -107,24 +106,20 @@ StatusType AVL_Tree<T>::removal(TreeNode<T> *node) {
     if (target->data != node->data) {
         return StatusType::FAILURE;
     }
-    //find the node to replace the deleted node
+    // Find the node to replace the deleted node
     TreeNode<T> *replace = target->right;
-    while (replace->left) {//inorder successor
+    while (replace && replace->left) { // Inorder successor
         replace = replace->left;
     }
     if (!replace) {
         replace = target->left;
-        while (replace->right) {//inorder predecessor
+        while (replace && replace->right) { // Inorder predecessor
             replace = replace->right;
-            while (replace->right) {
-                replace = replace->right;
-            }
         }
     }
-    if (replace) {//swaping nodes
+    if (replace) { // Swapping nodes
         target->data = replace->data;
         node = replace;
-
     }
     TreeNode<T> *parent = node->parent;
     if (node->left) {
@@ -139,7 +134,7 @@ StatusType AVL_Tree<T>::removal(TreeNode<T> *node) {
         } else {
             parent->right = node->right;
         }
-    } else {
+    } else { // Node is a leaf
         if (parent->left == node) {
             parent->left = nullptr;
         } else {
@@ -148,10 +143,10 @@ StatusType AVL_Tree<T>::removal(TreeNode<T> *node) {
     }
     delete node;
 
-    //need to balance trees.
+    // Need to balance trees.
+    // (Balancing code should be added here)
 
-
-
+    return StatusType::SUCCESS;
 }
 
 // Inorder traversal function
