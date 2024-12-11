@@ -13,8 +13,6 @@
 #ifndef PLAINS25WINTER_WET1_H_
 #define PLAINS25WINTER_WET1_H_
 
-#include "AVL_tree.h"
-#include "Horse.h"
 #include "Herd.h"
 #include "wet1util.h"
 
