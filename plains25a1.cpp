@@ -18,7 +18,22 @@ StatusType Plains::add_herd(int herdId)
 
 StatusType Plains::remove_herd(int herdId)
 {
-    return StatusType::FAILURE;
+    if(herdId <= 0 ) {
+        return StatusType::INVALID_INPUT;
+    } else {
+        herd *herd = new herd(herdId);
+        empty_herds.search(herd) = herd;
+        if(herd == nullptr) {
+            return StatusType::FAILURE;
+        } else {
+            try {
+                empty_herds.removal(herd);
+            } catch(...) {
+                return StatusType::FAILURE;//check if this is the correct exception
+            }
+        }
+    }
+    return StatusType::SUCCESS;
 }
 
 StatusType Plains::add_horse(int horseId, int speed)

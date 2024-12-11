@@ -122,6 +122,22 @@ StatusType AVL_Tree<T>::insert(TreeNode<T> *node) {
 }
 //oogabooga
 
+template<class T>
+bool AVL_Tree<T>:: exists(int id) {
+    TreeNode<T> *current = root;
+    while (current != nullptr) {
+        if (current->id == id) {
+            return true;
+        }
+        if (id < current->id) {
+            current = current->left;
+        } else {
+            current = current->right;
+        }
+    }
+    return false;
+}
+
 // Search function
 template<class T>
 TreeNode<T> *AVL_Tree<T>::search(TreeNode<T> *node) {

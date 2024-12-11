@@ -11,6 +11,8 @@ class herd {
 private:
     AVL_Tree<horse> herd_horses;
     int herd_id;
+public:
+    bool isEmpty(); //for pasha
 };
 
 #endif //DATA_STRUCTURES_HW1_HERD_H
