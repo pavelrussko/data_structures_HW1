@@ -54,6 +54,8 @@ StatusType AVL_Tree<T>::insert(TreeNode<T> *node) {
     int BF;
     node->parent = current;
     node->height = 0;
+    node->left = nullptr;
+    node->right = nullptr;
     if (node->data > current) {
         current->right = node;
     } else {
@@ -187,17 +189,21 @@ void AVL_Tree<T>::inorder(TreeNode<T> *node) {
 // LL rotation function
 template<class T>
 void AVL_Tree<T>::LL_rotation(TreeNode<T> *node) {
-    // Implementation of LL rotation function
+    TreeNode<T>* temp = node->left->right;
+    TreeNode<T>* child = node->left;
+    node->left = temp;
+    child->parent = node->parent;
+    child->right = node;
+    node->parent = child;
 }
 
 // LR rotation function
 template<class T>
 void AVL_Tree<T>::LR_rotation(TreeNode<T> *node) {
-    // Implementation of LR rotation function
+
 }
 
 // RR rotation function
-template<class T>
 template<class T>
 void AVL_Tree<T>::RR_rotation(TreeNode<T> *node) {
     TreeNode<T> *newRoot = node->right;
@@ -223,7 +229,7 @@ void AVL_Tree<T>::RR_rotation(TreeNode<T> *node) {
 
 // RL rotation function
 template<class T>
-void AVL_Tree<T>::RL_rotation(TreeNode<T> *node) {
+void AVL_Tree<T>::Rl_rotation(TreeNode<T> *node){
     LL_rotation(node->right);
     RR_rotation(node);
 }
