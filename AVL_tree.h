@@ -19,7 +19,7 @@ public:
     StatusType insert(TreeNode<T> *);
     TreeNode<T> *search(TreeNode<T> *);
     StatusType removal(TreeNode<T> *);
-    void inorder(TreeNode<T> *, T*);
+    void inorder(TreeNode<T> *, T *);
     void LL_rotation(TreeNode<T> *);
     void LR_rotation(TreeNode<T> *);
     void RR_rotation(TreeNode<T> *);
@@ -31,7 +31,7 @@ public:
 
 template<class T>
 void AVL_Tree<T>::updateHeight(TreeNode<T> *node) {
-    if (node == nullptr) return;
+    if (node == nullptr) { return; }
     int leftHeight = (node->left) ? node->left->height : 0;
     int rightHeight = (node->right) ? node->right->height : 0;
     node->height = 1 + max(leftHeight, rightHeight);
@@ -47,46 +47,56 @@ StatusType AVL_Tree<T>::insert(TreeNode<T> *node) {
     if (node->data < 0) {
         return StatusType::INVALID_INPUT;
     }
+    if (root == nullptr) {
+        root = node;
+        node->parent = nullptr;
+        node->left = nullptr;
+        node->right = nullptr;
+        node->height = 1;
+        return StatusType::SUCCESS;
+    }
     TreeNode<T> *current = search(node);
-    if (current == node) {
+    if (current != nullptr && current->data == node->data) {
         return StatusType::FAILURE;
     }
-    int BF;
-    node->parent = current;
-    node->height = 0;
+    current = root;
+    TreeNode<T> *parent = nullptr;
+    while (current != nullptr) {
+        parent = current;
+        if (node->data < current->data) {
+            current = current->left;
+        } else {
+            current = current->right;
+        }
+    }
+    node->parent = parent;
     node->left = nullptr;
     node->right = nullptr;
-    if (node->data > current) {
-        current->right = node;
+    node->height = 1;
+    if (node->data < parent->data) {
+        parent->left = node;
     } else {
-        current->left = current;
+        parent->right = node;
     }
-    while (current) {
-        BF = get_BF(current);
+    current = node->parent;
+    while (current != nullptr) {
+        updateHeight(current);
+        int BF = get_BF(current);
         if (BF > 1 || BF < -1) {
-            int child_BF;
             if (BF > 1) {
-                child_BF = get_BF(current->left);
-                if (child_BF >= 0) {
-                    LL_rotation(node);
-                    return StatusType::SUCCESS;
+                if (get_BF(current->left) >= 0) {
+                    LL_rotation(current);
                 } else {
-                    LR_rotation(node);
-                    return StatusType::SUCCESS;
+                    LR_rotation(current);
                 }
             } else {
-                child_BF = get_BF(current->right);
-                if (child_BF <= 0) {
-                    RR_rotation(node);
-                    return StatusType::SUCCESS;
+                if (get_BF(current->right) <= 0) {
+                    RR_rotation(current);
                 } else {
-                    Rl_rotation(node);
-                    return StatusType::SUCCESS;
+                    Rl_rotation(current);
                 }
             }
         }
-        current->height =
-                1 + max(current->left->height, current->right->height);
         current = current->parent;
     }
     return StatusType::SUCCESS;
@@ -96,101 +106,89 @@ StatusType AVL_Tree<T>::insert(TreeNode<T> *node) {
 template<class T>
 TreeNode<T> *AVL_Tree<T>::search(TreeNode<T> *node) {
     TreeNode<T> *current = root;
-    while ((current->left && current->right) || (current->data != node->data)) {
-        if (node->data < current->data && current->left) {
+    while (current != nullptr && current->data != node->data) {
+        if (node->data < current->data) {
             current = current->left;
-        } else if (node->data > current->data && current->right) {
-            current = current->right;
         } else {
-            return current;
+            current = current->right;
         }
     }
     return current;
 }
 
+// Removal function
 template<class T>
 StatusType AVL_Tree<T>::removal(TreeNode<T> *node) {
     if (node->data <= 0) {
         return StatusType::INVALID_INPUT;
     }
     TreeNode<T> *target = search(node);
-    if (target->data != node->data) {
+    if (target == nullptr || target->data != node->data) {
         return StatusType::FAILURE;
     }
-    // Find the node to replace the deleted node
-    TreeNode<T> *replace = target->right;
-    while (replace && replace->left) { // Inorder successor
-        replace = replace->left;
-    }
-    if (!replace) {
-        replace = target->left;
-        while (replace && replace->right) { // Inorder predecessor
-            replace = replace->right;
+
+    TreeNode<T> *replace = nullptr;
+    if (target->left && target->right) {
+        replace = target->right;
+        while (replace->left) {
+            replace = replace->left;
         }
-    }
-    if (replace) { // Swapping nodes
         target->data = replace->data;
-        node = replace;
+        target = replace;
     }
-    TreeNode<T> *parent = node->parent;
-    if (node->left) {
-        if (parent->left == node) {
-            parent->left = node->left;
-        } else {
-            parent->right = node->left;
-        }
-    } else if (node->right) {
-        if (parent->left == node) {
-            parent->left = node->right;
-        } else {
-            parent->right = node->right;
-        }
-    } else { // Node is a leaf
-        if (parent->left == node) {
-            parent->left = nullptr;
-        } else {
-            parent->right = nullptr;
-        }
+
+    TreeNode<T> *child = (target->left) ? target->left : target->right;
+    TreeNode<T> *parent = target->parent;
+
+    if (child) {
+        child->parent = parent;
     }
-    delete node;
-    parent->height = setHeight(parent);
+
+    if (!parent) {
+        root = child;
+    } else if (parent->left == target) {
+        parent->left = child;
+    } else {
+        parent->right = child;
+    }
+
+    delete target;
+
     while (parent) {
+        updateHeight(parent);
         int BF = get_BF(parent);
         if (BF > 1 || BF < -1) {
-            int child_BF;
             if (BF > 1) {
-                child_BF = get_BF(parent->left);
-                if (child_BF >= 0) {
+                if (get_BF(parent->left) >= 0) {
                     LL_rotation(parent);
                 } else {
                     LR_rotation(parent);
                 }
             } else {
-                child_BF = get_BF(parent->right);
-                if (child_BF <= 0) {
+                if (get_BF(parent->right) <= 0) {
                     RR_rotation(parent);
                 } else {
                     Rl_rotation(parent);
                 }
             }
         }
-        parent->height = setHeight(parent);
         parent = parent->parent;
     }
+
     return StatusType::SUCCESS;
 }
 
 // Inorder traversal function
 template<class T>
-void AVL_Tree<T>::inorder(TreeNode<T> *node,T* arr) {
+void AVL_Tree<T>::inorder(TreeNode<T> *node, T *arr) {
     //TODO
 }
 
 // LL rotation function
 template<class T>
 void AVL_Tree<T>::LL_rotation(TreeNode<T> *node) {
-    TreeNode<T>* temp = node->left->right;
-    TreeNode<T>* child = node->left;
+    TreeNode<T> *temp = node->left->right;
+    TreeNode<T> *child = node->left;
     node->left = temp;
     child->parent = node->parent;
     child->right = node;
@@ -232,7 +230,7 @@ void AVL_Tree<T>::RR_rotation(TreeNode<T> *node) {
 
 // RL rotation function
 template<class T>
-void AVL_Tree<T>::Rl_rotation(TreeNode<T> *node){
+void AVL_Tree<T>::Rl_rotation(TreeNode<T> *node) {
     LL_rotation(node->right);
     RR_rotation(node);
 }
