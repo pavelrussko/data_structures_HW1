@@ -9,10 +9,7 @@ Plains::Plains()
 
 }
 
-Plains::~Plains()
-{
-
-}
+Plains::~Plains() = default;
 
 StatusType Plains::add_herd(int herdId)
 {

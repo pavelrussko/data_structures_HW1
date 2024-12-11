@@ -9,6 +9,7 @@ private:
     int follow_id;
     int versionfollow;
     horse *follow;
+    bool isVisited;
 public:
     int get_version();
     int get_horse_id();

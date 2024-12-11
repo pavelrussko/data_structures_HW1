@@ -13,8 +13,10 @@ struct TreeNode {
 template<class T>
 class AVL_Tree {
 private:
+    void destroyTree(TreeNode<T> *node);
     TreeNode<T> *root;
 public:
+    ~AVL_Tree();
     AVL_Tree();
     StatusType insert(TreeNode<T> *);
     TreeNode<T> *search(TreeNode<T> *);
@@ -27,7 +29,24 @@ public:
     int get_BF(TreeNode<T> *);
     int max(int a, int b);
     void updateHeight(TreeNode<T> *);
+    TreeNode<T> *getRoot() { return root; }
 };
+
+
+template<class T>
+AVL_Tree<T>::~AVL_Tree() {
+    destroyTree(root);
+}
+
+template<class T>
+void AVL_Tree<T>::destroyTree(TreeNode<T> *node) {
+    if (node == nullptr) {
+        return;
+    }
+    destroyTree(node->left);
+    destroyTree(node->right);
+    delete node;
+}
 
 template<class T>
 void AVL_Tree<T>::updateHeight(TreeNode<T> *node) {
