@@ -44,7 +44,7 @@ AVL_Tree<T>::AVL_Tree() : root(nullptr) {}
 // Insert function
 template<class T>
 StatusType AVL_Tree<T>::insert(TreeNode<T> *node) {
-    if (node->data < 0) {
+    if (*(node->data) < 0) {
         return StatusType::INVALID_INPUT;
     }
     if (root == nullptr) {
@@ -56,14 +56,14 @@ StatusType AVL_Tree<T>::insert(TreeNode<T> *node) {
         return StatusType::SUCCESS;
     }
     TreeNode<T> *current = search(node);
-    if (current != nullptr && current->data == node->data) {
+    if (current != nullptr && *(current->data) == *(node->data)) {
         return StatusType::FAILURE;
     }
     current = root;
     TreeNode<T> *parent = nullptr;
     while (current != nullptr) {
         parent = current;
-        if (node->data < current->data) {
+        if (*(node->data) < *(current->data)) {
             current = current->left;
         } else {
             current = current->right;
@@ -73,7 +73,7 @@ StatusType AVL_Tree<T>::insert(TreeNode<T> *node) {
     node->left = nullptr;
     node->right = nullptr;
     node->height = 1;
-    if (node->data < parent->data) {
+    if (*(node->data) < *(parent->data)) {
         parent->left = node;
     } else {
         parent->right = node;
@@ -107,8 +107,8 @@ StatusType AVL_Tree<T>::insert(TreeNode<T> *node) {
 template<class T>
 TreeNode<T> *AVL_Tree<T>::search(TreeNode<T> *node) {
     TreeNode<T> *current = root;
-    while (current != nullptr && current->data != node->data) {
-        if (node->data < current->data) {
+    while (current != nullptr && *(current->data) != *(node->data)) {
+        if (*(node->data) < *(current->data)) {
             current = current->left;
         } else {
             current = current->right;
@@ -120,12 +120,19 @@ TreeNode<T> *AVL_Tree<T>::search(TreeNode<T> *node) {
 // Removal function
 template<class T>
 StatusType AVL_Tree<T>::removal(TreeNode<T> *node) {
-    if (node->data <= 0) {
+    if(!root){
+        return StatusType::FAILURE;
+    }
+    if (*(node->data) <= 0) {
         return StatusType::INVALID_INPUT;
     }
     TreeNode<T> *target = search(node);
-    if (target == nullptr || target->data != node->data) {
+    if (target == nullptr || *(target->data) != *(node->data)) {
         return StatusType::FAILURE;
+    }
+    if(target == root && !target->left && !target->right){
+        root = nullptr;
+        return StatusType::SUCCESS;
     }
 
     TreeNode<T> *replace = nullptr;
