@@ -13,13 +13,16 @@
 #ifndef PLAINS25WINTER_WET1_H_
 #define PLAINS25WINTER_WET1_H_
 
+#include "AVL_tree.h"
+#include "Horse.h"
+#include "Herd.h"
 #include "wet1util.h"
 
 class Plains {
 private:
-    //
-    // Here you may add anything you want
-    //
+    AVL_Tree<horse> horses;
+    AVL_Tree<herd> herds;
+    AVL_Tree<herd> empty_herds;
 
 public:
     // <DO-NOT-MODIFY> {
