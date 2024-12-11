@@ -19,7 +19,7 @@ public:
     StatusType insert(TreeNode<T> *);
     TreeNode<T> *search(TreeNode<T> *);
     StatusType removal(TreeNode<T> *);
-    void inorder(TreeNode<T> *);
+    void inorder(TreeNode<T> *, T*);
     void LL_rotation(TreeNode<T> *);
     void LR_rotation(TreeNode<T> *);
     void RR_rotation(TreeNode<T> *);
@@ -32,8 +32,8 @@ public:
 template<class T>
 void AVL_Tree<T>::updateHeight(TreeNode<T> *node) {
     if (node == nullptr) return;
-    int leftHeight = (node->left) ? node->left->height : -1;
-    int rightHeight = (node->right) ? node->right->height : -1;
+    int leftHeight = (node->left) ? node->left->height : 0;
+    int rightHeight = (node->right) ? node->right->height : 0;
     node->height = 1 + max(leftHeight, rightHeight);
 }
 
@@ -182,8 +182,8 @@ StatusType AVL_Tree<T>::removal(TreeNode<T> *node) {
 
 // Inorder traversal function
 template<class T>
-void AVL_Tree<T>::inorder(TreeNode<T> *node) {
-    // Implementation of inorder traversal function
+void AVL_Tree<T>::inorder(TreeNode<T> *node,T* arr) {
+    //TODO
 }
 
 // LL rotation function
@@ -195,12 +195,15 @@ void AVL_Tree<T>::LL_rotation(TreeNode<T> *node) {
     child->parent = node->parent;
     child->right = node;
     node->parent = child;
+    updateHeight(node);
+    updateHeight(child);
 }
 
 // LR rotation function
 template<class T>
 void AVL_Tree<T>::LR_rotation(TreeNode<T> *node) {
-
+    RR_rotation(node->left);
+    LL_rotation(node);
 }
 
 // RR rotation function
