@@ -31,7 +31,7 @@ public:
 
 template<class T>
 void AVL_Tree<T>::updateHeight(TreeNode<T> *node) {
-    if (node == nullptr) return;
+    if (node == nullptr) { return; }
     int leftHeight = (node->left) ? node->left->height : -1;
     int rightHeight = (node->right) ? node->right->height : -1;
     node->height = 1 + max(leftHeight, rightHeight);
@@ -198,7 +198,6 @@ void AVL_Tree<T>::LR_rotation(TreeNode<T> *node) {
 
 // RR rotation function
 template<class T>
-template<class T>
 void AVL_Tree<T>::RR_rotation(TreeNode<T> *node) {
     TreeNode<T> *newRoot = node->right;
     node->right = newRoot->left;
@@ -223,7 +222,7 @@ void AVL_Tree<T>::RR_rotation(TreeNode<T> *node) {
 
 // RL rotation function
 template<class T>
-void AVL_Tree<T>::RL_rotation(TreeNode<T> *node) {
+void Rl_rotation(TreeNode<T> *node) {
     LL_rotation(node->right);
     RR_rotation(node);
 }
