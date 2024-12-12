@@ -8,6 +8,9 @@ struct TreeNode {
     TreeNode<T> *right;
     TreeNode<T> *parent;
     int height;
+
+    TreeNode(T data) : data(nullptr), left(nullptr), right(nullptr),
+                       parent(nullptr), height(0) {}
 };
 
 template<class T>
@@ -18,9 +21,14 @@ private:
 public:
     ~AVL_Tree();
     AVL_Tree();
+    AVL_Tree(T data);
     StatusType insert(TreeNode<T> *);
     TreeNode<T> *search(TreeNode<T> *);
     StatusType removal(TreeNode<T> *);
+
+    bool isEmpty() { return root == nullptr; }
+
+    void moveToTree(TreeNode<T> *, AVL_Tree<T> *); //TODO
     void inorder(TreeNode<T> *, T *);
     void LL_rotation(TreeNode<T> *);
     void LR_rotation(TreeNode<T> *);
@@ -29,6 +37,7 @@ public:
     int get_BF(TreeNode<T> *);
     int max(int a, int b);
     void updateHeight(TreeNode<T> *);
+
     TreeNode<T> *getRoot() { return root; }
 };
 
@@ -36,6 +45,66 @@ public:
 template<class T>
 AVL_Tree<T>::~AVL_Tree() {
     destroyTree(root);
+}
+
+template<class T>
+AVL_Tree<T>::AVL_Tree(T data) {
+    root = new TreeNode<T>();
+    root->data = new T(data);
+    root->left = nullptr;
+    root->right = nullptr;
+    root->parent = nullptr;
+    root->height = 1;
+}
+
+template<class T>
+void AVL_Tree<T>::moveToTree(TreeNode<T> *node, AVL_Tree<T> *targetTree) {
+    if (node == nullptr || targetTree == nullptr) {
+        return;
+    }
+
+    // Detach the node from the current tree
+    TreeNode<T> *parent = node->parent;
+    if (parent) {
+        if (parent->left == node) {
+            parent->left = nullptr;
+        } else {
+            parent->right = nullptr;
+        }
+    } else {
+        root = nullptr;
+    }
+
+    // Update heights and balance the original tree
+    while (parent) {
+        updateHeight(parent);
+        int BF = get_BF(parent);
+        if (BF > 1 || BF < -1) {
+            if (BF > 1) {
+                if (get_BF(parent->left) >= 0) {
+                    LL_rotation(parent);
+                } else {
+                    LR_rotation(parent);
+                }
+            } else {
+                if (get_BF(parent->right) <= 0) {
+                    RR_rotation(parent);
+                } else {
+                    Rl_rotation(parent);
+                }
+            }
+        }
+        parent = parent->parent;
+    }
+
+    // Reset node pointers
+    node->parent = nullptr;
+    node->left = nullptr;
+    node->right = nullptr;
+    node->height = 1;
+
+    // Insert the node into the target tree
+    targetTree->insert(node);
 }
 
 template<class T>
@@ -122,22 +191,6 @@ StatusType AVL_Tree<T>::insert(TreeNode<T> *node) {
 }
 //oogabooga
 
-template<class T>
-bool AVL_Tree<T>:: exists(int id) {
-    TreeNode<T> *current = root;
-    while (current != nullptr) {
-        if (current->id == id) {
-            return true;
-        }
-        if (id < current->id) {
-            current = current->left;
-        } else {
-            current = current->right;
-        }
-    }
-    return false;
-}
-
 // Search function
 template<class T>
 TreeNode<T> *AVL_Tree<T>::search(TreeNode<T> *node) {
@@ -155,7 +208,7 @@ TreeNode<T> *AVL_Tree<T>::search(TreeNode<T> *node) {
 // Removal function
 template<class T>
 StatusType AVL_Tree<T>::removal(TreeNode<T> *node) {
-    if(!root){
+    if (!root) {
         return StatusType::FAILURE;
     }
     if (*(node->data) <= 0) {
@@ -165,7 +218,7 @@ StatusType AVL_Tree<T>::removal(TreeNode<T> *node) {
     if (target == nullptr || *(target->data) != *(node->data)) {
         return StatusType::FAILURE;
     }
-    if(target == root && !target->left && !target->right){
+    if (target == root && !target->left && !target->right) {
         root = nullptr;
         return StatusType::SUCCESS;
     }

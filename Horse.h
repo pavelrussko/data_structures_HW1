@@ -24,6 +24,7 @@ public:
     void set_versionfollow(int versionfollow);
     void set_follow(horse *follow);
     horse(int horse_id, int speed);
+    horse(int horse_id);
 
     bool operator<(const horse &other) const {
         return horse_id < other.horse_id;
@@ -38,5 +39,20 @@ public:
         versionfollow = other.versionfollow;
         follow = other.follow;
         return *this;
+    }
+
+    bool operator==(const horse &other) const {
+        return horse_id == other.horse_id;
+    }
+
+    bool operator!=(const horse &other) const {
+        return !(*this == other);
+    }
+
+    bool operator<=(int a) const {
+        if (horse_id <= a) {
+            return true;
+        }
+        return false;
     }
 };
