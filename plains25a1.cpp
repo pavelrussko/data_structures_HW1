@@ -102,7 +102,8 @@ StatusType Plains::leave_herd(int horseId) { // ofek
     horse horseToLeave(horseId);
     TreeNode<horse> horseNode(horseToLeave);
     TreeNode<horse> *foundNode = horses.search(&horseNode);
-    if (foundNode == nullptr || *(foundNode->data) != horseToLeave) {
+    if (foundNode == nullptr || *(foundNode->data) != horseToLeave ||
+        foundNode->data->get_herd_id() == 0) {
         return StatusType::FAILURE;
     } else {
         int herdId = foundNode->data->get_herd_id();
