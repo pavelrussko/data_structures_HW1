@@ -4,10 +4,7 @@
 #include "plains25a1.h"
 
 
-Plains::Plains()
-{
-
-}
+Plains::Plains():horses(), herds(), empty_herds(){}
 
 Plains::~Plains()
 {
@@ -16,7 +13,9 @@ Plains::~Plains()
 
 StatusType Plains::add_herd(int herdId)
 {
-    return StatusType::FAILURE;
+    herd herdToInsert(herdId);
+    TreeNode<herd> to_insert = {&herdToInsert, nullptr, nullptr, nullptr};
+    return empty_herds.insert(&to_insert);
 }
 
 StatusType Plains::remove_herd(int herdId)
