@@ -9,8 +9,8 @@ struct TreeNode {
     TreeNode<T> *parent;
     int height;
 
-    TreeNode(T data) : data(nullptr), left(nullptr), right(nullptr),
-                       parent(nullptr), height(0) {}
+    TreeNode(T* data) : data(data), left(nullptr), right(nullptr),
+                        parent(nullptr), height(0) {}
 };
 
 template<class T>
