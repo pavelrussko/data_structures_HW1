@@ -13,9 +13,9 @@ Plains::~Plains()
 
 StatusType Plains::add_herd(int herdId)
 {
-    herd herdToInsert(herdId);
-    TreeNode<herd> to_insert = {&herdToInsert, nullptr, nullptr, nullptr};
-    return empty_herds.insert(&to_insert);
+    shared_ptr<herd> toInsert = make_shared<herd>(herdId);
+    shared_ptr<TreeNode<herd>> NodeToInsert = make_shared<TreeNode<herd>>(toInsert);
+    return empty_herds.insert(NodeToInsert);
 }
 
 StatusType Plains::remove_herd(int herdId)
