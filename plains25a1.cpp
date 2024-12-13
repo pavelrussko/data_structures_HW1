@@ -13,9 +13,7 @@ Plains::~Plains()
 
 StatusType Plains::add_herd(int herdId)
 {
-    shared_ptr<herd> toInsert = make_shared<herd>(herdId);
-    shared_ptr<TreeNode<herd>> NodeToInsert = make_shared<TreeNode<herd>>(toInsert);
-    return empty_herds.insert(NodeToInsert); //q
+    return empty_herds.insert(herd::make_herd_node(herdId));
 }
 
 StatusType Plains::remove_herd(int herdId)
@@ -25,7 +23,9 @@ StatusType Plains::remove_herd(int herdId)
 
 StatusType Plains::add_horse(int horseId, int speed)
 {
-    return StatusType::FAILURE;
+    shared_ptr<horse> horseToInsert = make_shared<horse>(horseId, speed);
+    shared_ptr<TreeNode<horse>> NodeToInsert = make_shared<TreeNode<horse>>(horseToInsert);
+    return horses.insert(NodeToInsert);//add node maker?
 }
 
 StatusType Plains::join_herd(int horseId, int herdId)
@@ -35,7 +35,15 @@ StatusType Plains::join_herd(int horseId, int herdId)
 
 StatusType Plains::follow(int horseId, int horseToFollowId)
 {
-    return StatusType::FAILURE;
+    if(horseId <= 0 || horseToFollowId <= 0 || horseId == horseToFollowId){
+        return StatusType::INVALID_INPUT;
+    }
+    shared_ptr<TreeNode<horse>> follower = horses.search(make_shared<TreeNode<horse>>(make_shared<horse>(horseId, 0)));
+    shared_ptr<TreeNode<horse>> toFollow = horses.search(make_shared<TreeNode<horse>>(make_shared<horse>(horseToFollowId, 0)));
+    if(follower->data->get_herd_id() != toFollow->data->get_herd_id()){
+        return StatusType::FAILURE;
+    }
+    //TODO
 }
 
 StatusType Plains::leave_herd(int horseId)
@@ -45,7 +53,14 @@ StatusType Plains::leave_herd(int horseId)
 
 output_t<int> Plains::get_speed(int horseId)
 {
-    return 0;
+    if(horseId <= 0){
+        return StatusType::FAILURE;
+    }
+    shared_ptr<TreeNode<horse>> horse = horses.search(horse::make_horse_node(horseId));
+    if(horse->data->get_horse_id() != horseId){
+        return StatusType::FAILURE;
+    }
+    return horse->data->get_speed();
 }
 
 output_t<bool> Plains::leads(int horseId, int otherHorseId)
@@ -55,5 +70,6 @@ output_t<bool> Plains::leads(int horseId, int otherHorseId)
 
 output_t<bool> Plains::can_run_together(int herdId)
 {
+    //TODO: implement inorder traversal
     return false;
 }

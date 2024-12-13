@@ -1,4 +1,5 @@
 #include "wet1util.h"
+#include "AVL_tree.h"
 
 class horse {
 private:
@@ -23,6 +24,7 @@ public:
     void set_versionfollow(int versionfollow);
     void set_follow(horse *follow);
     horse(int horse_id, int speed);
+    static shared_ptr<TreeNode<horse>> make_horse_node(int horse_id, int speed = 0);
 
     bool operator<(const horse &other) const {
         return horse_id < other.horse_id;

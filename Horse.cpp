@@ -60,3 +60,9 @@ void horse::set_follow(horse *follow) {
     set_follow_id(follow->get_horse_id());
     set_versionfollow(follow->get_version());
 }
+
+shared_ptr<TreeNode<horse>> horse::make_horse_node(int horse_id, int speed) {
+    shared_ptr<horse> toInsert = make_shared<horse>(horse_id, speed);
+    shared_ptr<TreeNode<horse>> NodeToInsert = make_shared<TreeNode<horse>>(toInsert);
+    return NodeToInsert;
+}
