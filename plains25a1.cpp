@@ -67,7 +67,7 @@ StatusType Plains::leave_herd(int horseId) {
 
     // Remove the horse from the herd
     horseNode->data->set_version(horseNode->data->get_version() + 1);
-    horseNode->data->set_herd_id(-1);
+    horseNode->data->set_herd_id(-1fine );
 
     herdNode->data->herd_horses.removal(horseNode);
 
