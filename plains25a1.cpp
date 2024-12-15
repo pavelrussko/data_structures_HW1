@@ -196,7 +196,8 @@ StatusType Plains::follow(int horseId, int horseToFollowId)
     if(follower->data->get_herd_id() != toFollow->data->get_herd_id()){
         return StatusType::FAILURE;
     }
-    //TODO
+    follower->data->set_follow(toFollow->data);
+    follower->data->set_versionfollow(toFollow->data->get_version());
     return StatusType::FAILURE;
 }
 
