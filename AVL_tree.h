@@ -283,6 +283,7 @@ StatusType AVL_Tree<T>::removal(shared_ptr<TreeNode<T>> node) {
 template<class T>
 void AVL_Tree<T>::inorder(shared_ptr<TreeNode<T>>node, T *arr) {
     //TODO
+    return;
 }
 
 // LL rotation function

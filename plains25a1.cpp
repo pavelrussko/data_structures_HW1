@@ -10,7 +10,12 @@ Plains::~Plains() = default;
 
 StatusType Plains::add_herd(int herdId)
 {
+    if(herdId <= 0){
+        return StatusType::INVALID_INPUT;
+    }
+
     return empty_herds.insert(herd::make_herd_node(herdId));
+
 }
 
 StatusType Plains::remove_herd(int herdId) {
@@ -47,7 +52,7 @@ StatusType Plains::leave_herd(int horseId) {
     horse horseToLeave(horseId);
     // Search for the horse
     shared_ptr<TreeNode<horse>> horseNode = horses.search(horse::make_horse_node(horseId));
-    if (!horseNode || horseNode->data->get_herd_id() == 0) {
+    if (!horseNode || horseNode->data->get_herd_id() == -1) {
         return StatusType::FAILURE;
     }
 
@@ -86,32 +91,32 @@ StatusType Plains::join_herd(int horseId, int herdId) {
         return StatusType::INVALID_INPUT;
     }
 
+    // Search for the herd in both herds and empty_herds
     shared_ptr<TreeNode<herd>> herdNode = herds.search(herd::make_herd_node(herdId));
-    if (herdNode->data->get_id() != herdId) {
+    if (!herdNode) {  // Herd not found in non-empty herds, check empty herds
         herdNode = empty_herds.search(herd::make_herd_node(herdId));
-        if (!herdNode) {
+        if (!herdNode) {  // Herd not found at all
             return StatusType::FAILURE;
         }
     }
 
-    // Check if the horse exists and is not already in a herd
+    // Search for the horse
     shared_ptr<TreeNode<horse>> horseNode = horses.search(horse::make_horse_node(horseId));
-    if (!horseNode || horseNode->data->get_herd_id() != 0) {
+    if (!horseNode || horseNode->data->get_herd_id() != -1) {  // Horse doesn't exist or is already in a herd
         return StatusType::FAILURE;
     }
 
     // Add the horse to the herd
-    horseNode->data->set_herd_id(herdId);
-    herdNode->data->herd_horses.insert(make_shared<TreeNode<horse>>(horseNode->data));
+    horseNode->data->set_herd_id(herdId);  // Update horse's herd ID
+    herdNode->data->herd_horses.insert(make_shared<TreeNode<horse>>(horseNode->data));  // Insert horse into the herd
 
-    // Move herd from empty_herds to herds if necessary
+    // If the herd was empty, move it from empty_herds to herds
     if (empty_herds.search(herd::make_herd_node(herdId))->data->get_id() == herdId) {
-        herds.moveToTree(herdNode, make_shared<AVL_Tree<herd>>(empty_herds));
+        herds.moveToTree(herdNode, make_shared<AVL_Tree<herd>>(empty_herds));  // Move to non-empty herds
     }
 
     return StatusType::SUCCESS;
 }
-
 output_t<bool> Plains::leads(int horseId, int otherHorseId) {
     if (horseId <= 0 || otherHorseId <= 0) {
         return false; // Invalid input check
@@ -198,7 +203,7 @@ StatusType Plains::follow(int horseId, int horseToFollowId)
     }
     follower->data->set_follow(toFollow->data);
     follower->data->set_versionfollow(toFollow->data->get_version());
-    return StatusType::FAILURE;
+    return StatusType::SUCCESS;
 }
 
 output_t<int> Plains::get_speed(int horseId)
