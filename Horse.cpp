@@ -6,17 +6,17 @@
 horse::horse(int horse_id, int speed) : horse_id(horse_id), speed(speed),
                                         herd_id(-1), follow_id(-1), version(0),
                                         versionfollow(0), follow(nullptr) {
-    if (speed <= 0 || horse_id <= 0) {
+    /*if (speed <= 0 || horse_id <= 0) {
         throw StatusType::INVALID_INPUT; //change it
-    }
+    }*/
 }
 
 horse::horse(int horse_id) : horse_id(horse_id), speed(0),
                              herd_id(-1), follow_id(-1), version(0),
                              versionfollow(0), follow(nullptr) {
-    if (horse_id <= 0) {
+  /*  if (horse_id <= 0) {
         throw StatusType::INVALID_INPUT; //change it
-    }
+    }*/
 }
 
 int horse::get_version() {

@@ -114,7 +114,7 @@ StatusType Plains::join_herd(int horseId, int herdId) {
 
 output_t<bool> Plains::leads(int horseId, int otherHorseId) {
     if (horseId <= 0 || otherHorseId <= 0) {
-        return output_t<bool>(false); // Invalid input check
+        return false; // Invalid input check
     }
 
     // Search for the follower and leader in the AVL tree
@@ -125,7 +125,7 @@ output_t<bool> Plains::leads(int horseId, int otherHorseId) {
 
     // If either horse doesn't exist, return false
     if (followerNode->data->get_id() != horseId || leaderNode->data->get_id() != otherHorseId) {
-        return output_t<bool>(false);
+        return false;
     }
 
     // Follow the chain of horses to see if the follower eventually leads the leader
@@ -146,7 +146,7 @@ output_t<bool> Plains::leads(int horseId, int otherHorseId) {
                 shared_ptr<TreeNode<horse>> fakeNode = make_shared<TreeNode<horse>>(nextHorse);
                 currentNode = horses.search(fakeNode);
             }
-            return output_t<bool>(false); // Cycle detected
+            return false; // Cycle detected
         }
 
         // Mark the current horse as visited
@@ -183,5 +183,37 @@ output_t<bool> Plains::leads(int horseId, int otherHorseId) {
         currentNode = horses.search(fakeNode);
     }
 
-    return output_t<bool>(foundLeader);
+    return foundLeader;
+}
+
+StatusType Plains::follow(int horseId, int horseToFollowId)
+{
+    if(horseId <= 0 || horseToFollowId <= 0 || horseId == horseToFollowId){
+        return StatusType::INVALID_INPUT;
+    }
+    shared_ptr<TreeNode<horse>> follower = horses.search(make_shared<TreeNode<horse>>(make_shared<horse>(horseId, 0)));
+    shared_ptr<TreeNode<horse>> toFollow = horses.search(make_shared<TreeNode<horse>>(make_shared<horse>(horseToFollowId, 0)));
+    if(follower->data->get_herd_id() != toFollow->data->get_herd_id()){
+        return StatusType::FAILURE;
+    }
+    //TODO
+    return StatusType::FAILURE;
+}
+
+output_t<int> Plains::get_speed(int horseId)
+{
+    if(horseId <= 0){
+        return StatusType::FAILURE;
+    }
+    shared_ptr<TreeNode<horse>> horse = horses.search(horse::make_horse_node(horseId));
+    if(horse->data->get_horse_id() != horseId){
+        return StatusType::FAILURE;
+    }
+    return horse->data->get_speed();
+}
+
+output_t<bool> Plains::can_run_together(int herdId)
+{
+    //TODO: implement inorder traversal
+    return false;
 }

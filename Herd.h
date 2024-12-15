@@ -1,6 +1,7 @@
 //
 // Created by Ofek on 11/12/2024.
 //
+
 #include "Horse.h"
 
 #ifndef DATA_STRUCTURES_HW1_HERD_H
