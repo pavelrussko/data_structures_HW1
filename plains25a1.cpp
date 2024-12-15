@@ -1,15 +1,14 @@
 // You can edit anything you want in this file.
-// However you need to implement all public Plains function, as provided below as a template
+// However, you need to implement all public Plains function, as provided below as a template
 
 #include "plains25a1.h"
 
 
-Plains::Plains():horses(), herds(), empty_herds(){}
+Plains::Plains() : horses(), herds(), empty_herds() {}
 
 Plains::~Plains() = default;
 
-StatusType Plains::add_herd(int herdId)
-{
+StatusType Plains::add_herd(int herdId) {
     return empty_herds.insert(herd::make_herd_node(herdId));
 }
 
@@ -19,14 +18,16 @@ StatusType Plains::remove_herd(int herdId) {
     }
 
     // Check in empty_herds
-    shared_ptr<TreeNode<herd>> emptyHerdNode = empty_herds.search(herd::make_herd_node(herdId));
+    shared_ptr<TreeNode<herd>> emptyHerdNode = empty_herds.search(
+            herd::make_herd_node(herdId));
     if (emptyHerdNode) {
         empty_herds.removal(emptyHerdNode);
         return StatusType::SUCCESS;
     }
 
     // Check in herds
-    shared_ptr<TreeNode<herd> >nonEmptyHerdNode = herds.search(herd::make_herd_node(herdId));
+    shared_ptr<TreeNode<herd> > nonEmptyHerdNode = herds.search(
+            herd::make_herd_node(herdId));
     if (nonEmptyHerdNode) {
         if (!nonEmptyHerdNode->data->herd_horses.isEmpty()) {
             return StatusType::FAILURE; // now allowed to remove a herd with horses
@@ -46,7 +47,8 @@ StatusType Plains::leave_herd(int horseId) {
     // Create a fake node for the horse
     horse horseToLeave(horseId);
     // Search for the horse
-    shared_ptr<TreeNode<horse>> horseNode = horses.search(horse::make_horse_node(horseId));
+    shared_ptr<TreeNode<horse>> horseNode = horses.search(
+            horse::make_horse_node(horseId));
     if (!horseNode || horseNode->data->get_herd_id() == 0) {
         return StatusType::FAILURE;
     }
@@ -55,7 +57,8 @@ StatusType Plains::leave_herd(int horseId) {
 
     // Find the herd the horse belongs to
     herd herdToLeave(herdId);
-    shared_ptr<TreeNode<herd>> herdNode = herds.search(herd::make_herd_node(herdId));
+    shared_ptr<TreeNode<herd>> herdNode = herds.search(
+            herd::make_herd_node(herdId));
     if (!herdNode) {
         return StatusType::FAILURE;
     }
@@ -74,10 +77,10 @@ StatusType Plains::leave_herd(int horseId) {
     return StatusType::SUCCESS;
 }
 
-StatusType Plains::add_horse(int horseId, int speed)
-{
+StatusType Plains::add_horse(int horseId, int speed) {
     shared_ptr<horse> horseToInsert = make_shared<horse>(horseId, speed);
-    shared_ptr<TreeNode<horse>> NodeToInsert = make_shared<TreeNode<horse>>(horseToInsert);
+    shared_ptr<TreeNode<horse>> NodeToInsert = make_shared<TreeNode<horse>>(
+            horseToInsert);
     return horses.insert(NodeToInsert);//add node maker?
 }
 
@@ -86,7 +89,8 @@ StatusType Plains::join_herd(int horseId, int herdId) {
         return StatusType::INVALID_INPUT;
     }
 
-    shared_ptr<TreeNode<herd>> herdNode = herds.search(herd::make_herd_node(herdId));
+    shared_ptr<TreeNode<herd>> herdNode = herds.search(
+            herd::make_herd_node(herdId));
     if (herdNode->data->get_id() != herdId) {
         herdNode = empty_herds.search(herd::make_herd_node(herdId));
         if (!herdNode) {
@@ -95,17 +99,20 @@ StatusType Plains::join_herd(int horseId, int herdId) {
     }
 
     // Check if the horse exists and is not already in a herd
-    shared_ptr<TreeNode<horse>> horseNode = horses.search(horse::make_horse_node(horseId));
+    shared_ptr<TreeNode<horse>> horseNode = horses.search(
+            horse::make_horse_node(horseId));
     if (!horseNode || horseNode->data->get_herd_id() != 0) {
         return StatusType::FAILURE;
     }
 
     // Add the horse to the herd
     horseNode->data->set_herd_id(herdId);
-    herdNode->data->herd_horses.insert(make_shared<TreeNode<horse>>(horseNode->data));
+    herdNode->data->herd_horses.insert(
+            make_shared<TreeNode<horse>>(horseNode->data));
 
     // Move herd from empty_herds to herds if necessary
-    if (empty_herds.search(herd::make_herd_node(herdId))->data->get_id() == herdId) {
+    if (empty_herds.search(herd::make_herd_node(herdId))->data->get_id() ==
+        herdId) {
         herds.moveToTree(herdNode, make_shared<AVL_Tree<herd>>(empty_herds));
     }
 
@@ -119,12 +126,15 @@ output_t<bool> Plains::leads(int horseId, int otherHorseId) {
 
     // Search for the follower and leader in the AVL tree
 
-    shared_ptr<TreeNode<horse>> followerNode = horses.search(horse::make_horse_node(horseId));
-    shared_ptr<TreeNode<horse>> leaderNode = horses.search(horse::make_horse_node(otherHorseId));
+    shared_ptr<TreeNode<horse>> followerNode = horses.search(
+            horse::make_horse_node(horseId));
+    shared_ptr<TreeNode<horse>> leaderNode = horses.search(
+            horse::make_horse_node(otherHorseId));
 
 
     // If either horse doesn't exist, return false
-    if (followerNode->data->get_id() != horseId || leaderNode->data->get_id() != otherHorseId) {
+    if (followerNode->data->get_id() != horseId ||
+        leaderNode->data->get_id() != otherHorseId) {
         return false;
     }
 
@@ -143,7 +153,8 @@ output_t<bool> Plains::leads(int horseId, int otherHorseId) {
                 currentNode->data->isVisited = false;
                 shared_ptr<horse> nextHorse = currentNode->data->get_follow();
                 if (!nextHorse) { break; }
-                shared_ptr<TreeNode<horse>> fakeNode = make_shared<TreeNode<horse>>(nextHorse);
+                shared_ptr<TreeNode<horse>> fakeNode = make_shared<TreeNode<horse>>(
+                        nextHorse);
                 currentNode = horses.search(fakeNode);
             }
             return false; // Cycle detected
@@ -167,17 +178,19 @@ output_t<bool> Plains::leads(int horseId, int otherHorseId) {
         }
 
         // Create a fake node with the next horse data and find the corresponding node in the tree
-        shared_ptr<TreeNode<horse>> fakeNode1 = make_shared<TreeNode<horse>>(nextHorse);
+        shared_ptr<TreeNode<horse>> fakeNode1 = make_shared<TreeNode<horse>>(
+                nextHorse);
         currentNode = horses.search(fakeNode1);
     }
 
     // Reset all visited flags before returning
     currentNode = followerNode;
-    shared_ptr<TreeNode<horse>> fakeNode = make_shared<TreeNode<horse>>(followerNode->data);
+    shared_ptr<TreeNode<horse>> fakeNode = make_shared<TreeNode<horse>>(
+            followerNode->data);
 
     while (currentNode->data->get_id() != fakeNode->data->get_id()) {
         currentNode->data->isVisited = false;
-        shared_ptr<horse>nextHorse = currentNode->data->get_follow();
+        shared_ptr<horse> nextHorse = currentNode->data->get_follow();
         if (!nextHorse) { break; }
         fakeNode = make_shared<TreeNode<horse>>(nextHorse);
         currentNode = horses.search(fakeNode);

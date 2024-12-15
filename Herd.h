@@ -13,11 +13,14 @@ private:
 public:
     AVL_Tree<horse> herd_horses;
     bool operator<=(int) const;
-    bool operator<(const herd&) const;
-    bool operator==(const herd&) const;
-    bool operator!=(const herd&) const;
-    herd(int herdId):herd_id(herdId),herd_horses(){}
+    bool operator<(const herd &) const;
+    bool operator==(const herd &) const;
+    bool operator!=(const herd &) const;
+
+    herd(int herdId) : herd_id(herdId), herd_horses() {}
+
     static shared_ptr<TreeNode<herd>> make_herd_node(int herdId);
+
     int get_id() const { return herd_id; }
 };
 
