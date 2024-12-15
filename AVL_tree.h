@@ -2,7 +2,6 @@
 #include "wet1util.h"
 
 #include <memory>
-
 using namespace std;
 
 template<class T>
@@ -14,14 +13,13 @@ struct TreeNode {
     shared_ptr<TreeNode<T>> parent;
     int height;
 
-    TreeNode(shared_ptr<T> data, shared_ptr<TreeNode<T>> left = nullptr,
-             shared_ptr<TreeNode<T>> right = nullptr,
-             shared_ptr<TreeNode<T>> parent = nullptr, int height = 0) :
-            data(data),
-            left(left),
-            right(right),
-            parent(parent),
-            height(height) {}
+    TreeNode(shared_ptr<T> data, shared_ptr<TreeNode<T>> left = nullptr, shared_ptr<TreeNode<T>> right = nullptr,
+             shared_ptr<TreeNode<T>> parent = nullptr, int height = 0):
+             data(data),
+             left(left),
+             right(right),
+             parent(parent),
+             height(height){}
 };
 
 template<class T>
@@ -54,10 +52,12 @@ public:
 };
 
 template<class T>
-void moveToTree(shared_ptr<TreeNode<T>> nodeToMove,
+void AVL_Tree<T>::moveToTree(shared_ptr<TreeNode<T>> nodeToMove,
                 shared_ptr<AVL_Tree<T>> treeToMoveTo) {
+    shared_ptr<T> data = nodeToMove->data;
+    treeToMoveTo->insert(make_shared<TreeNode<T>>(data));
     removal(nodeToMove);
-    treeToMoveTo->insert(nodeToMove);
+
 }
 
 template<class T>
@@ -75,56 +75,7 @@ AVL_Tree<T>::AVL_Tree(T data) {
     root->height = 1;
 }
 
-template<class T>
-void AVL_Tree<T>::moveToTree(shared_ptr<TreeNode<T>> node,
-                             shared_ptr<AVL_Tree<T>> targetTree) {
-    if (node == nullptr || targetTree == nullptr) {
-        return;
-    }
 
-    // Detach the node from the current tree
-    shared_ptr<TreeNode<T>> parent = node->parent;
-    if (parent) {
-        if (parent->left == node) {
-            parent->left = nullptr;
-        } else {
-            parent->right = nullptr;
-        }
-    } else {
-        root = nullptr;
-    }
-
-    // Update heights and balance the original tree
-    while (parent) {
-        updateHeight(parent);
-        int BF = get_BF(parent);
-        if (BF > 1 || BF < -1) {
-            if (BF > 1) {
-                if (get_BF(parent->left) >= 0) {
-                    LL_rotation(parent);
-                } else {
-                    LR_rotation(parent);
-                }
-            } else {
-                if (get_BF(parent->right) <= 0) {
-                    RR_rotation(parent);
-                } else {
-                    Rl_rotation(parent);
-                }
-            }
-        }
-        parent = parent->parent;
-    }
-
-    // Reset node pointers
-    node->parent = nullptr;
-    node->left = nullptr;
-    node->right = nullptr;
-    node->height = 1;
-
-    // Insert the node into the target tree
-    targetTree->insert(node);
-}
 
 template<class T>
 void AVL_Tree<T>::destroyTree(shared_ptr<TreeNode<T>> node) {
@@ -226,7 +177,7 @@ shared_ptr<TreeNode<T>> AVL_Tree<T>::search(shared_ptr<TreeNode<T>> node) {
 // Removal function
 template<class T>
 StatusType AVL_Tree<T>::removal(shared_ptr<TreeNode<T>> node) {
-    if (!root) {
+    if(!root){
         return StatusType::FAILURE;
     }
     if (*(node->data) <= 0) {
@@ -236,7 +187,7 @@ StatusType AVL_Tree<T>::removal(shared_ptr<TreeNode<T>> node) {
     if (target == nullptr || *(target->data) != *(node->data)) {
         return StatusType::FAILURE;
     }
-    if (target == root && !target->left && !target->right) {
+    if(target == root && !target->left && !target->right){
         root = nullptr;
         target->parent = nullptr;
         return StatusType::SUCCESS;
