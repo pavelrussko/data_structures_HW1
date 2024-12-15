@@ -118,6 +118,7 @@ StatusType Plains::join_herd(int horseId, int herdId) {
 }
     return StatusType::SUCCESS;
 }
+
 output_t<bool> Plains::leads(int horseId, int otherHorseId) {
     if (horseId <= 0 || otherHorseId <= 0) {
         return false; // Invalid input check
@@ -207,17 +208,20 @@ StatusType Plains::follow(int horseId, int horseToFollowId)
     return StatusType::SUCCESS;
 }
 
-output_t<int> Plains::get_speed(int horseId)
-{
-    if(horseId <= 0){
-        return StatusType::FAILURE;
+output_t<int> Plains::get_speed(int horseId) {
+    if (horseId <= 0) {
+        return StatusType::INVALID_INPUT; // INVALID_INPUT for invalid IDs
     }
-    shared_ptr<TreeNode<horse>> horse = horses.search(horse::make_horse_node(horseId));
-    if(horse->data->get_horse_id() != horseId){
-        return StatusType::FAILURE;
+
+    shared_ptr<TreeNode<horse>> horseNode = horses.search(horse::make_horse_node(horseId));
+
+    if (!horseNode || horseNode->data->get_horse_id() != horseId) {
+        return StatusType::FAILURE; // Horse not found
     }
-    return horse->data->get_speed();
+
+    return horseNode->data->get_speed();
 }
+
 
 output_t<bool> Plains::can_run_together(int herdId)
 {

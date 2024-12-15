@@ -1,35 +1,27 @@
 #include "Herd.h"
 
-
-bool herd::operator<=(int a) const{
-    if(herd_id <= a){
-        return true;
-    }
-    return false;
+// Comparison operator: herd_id <= integer
+bool herd::operator<=(int a) const {
+    return herd_id <= a;
 }
 
-bool herd::operator<(const herd& other) const{
-    if(herd_id < other.herd_id){
-        return true;
-    }
-    return false;
+// Comparison operator: less-than between herds
+bool herd::operator<(const herd& other) const {
+    return herd_id < other.herd_id;
 }
 
-bool herd::operator==(const herd& other) const{
-    if(herd_id == other.herd_id){
-        return true;
-    }
-    return false;
+// Equality operator for herds
+bool herd::operator==(const herd& other) const {
+    return herd_id == other.herd_id;
 }
 
+// Inequality operator for herds
 bool herd::operator!=(const herd& other) const {
     return !(*this == other);
 }
 
-shared_ptr<TreeNode<herd>> herd::make_herd_node(int herdId){
-    shared_ptr<herd> toInsert = make_shared<herd>(herdId);
-    shared_ptr<TreeNode<herd>> NodeToInsert = make_shared<TreeNode<herd>>(toInsert);
-    return NodeToInsert;
+// Static method to create a TreeNode containing a herd
+shared_ptr<TreeNode<herd>> herd::make_herd_node(int herdId) {
+    auto toInsert = make_shared<herd>(herdId);
+    return make_shared<TreeNode<herd>>(toInsert);
 }
-
-
