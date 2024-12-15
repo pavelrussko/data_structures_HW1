@@ -111,10 +111,11 @@ StatusType Plains::join_herd(int horseId, int herdId) {
     herdNode->data->herd_horses.insert(make_shared<TreeNode<horse>>(horseNode->data));  // Insert horse into the herd
 
     // If the herd was empty, move it from empty_herds to herds
+    if(!empty_herds.isEmpty()){
     if (empty_herds.search(herd::make_herd_node(herdId))->data->get_id() == herdId) {
         empty_herds.moveToTree(herdNode, herds);  // Move to non-empty herds
     }
-
+}
     return StatusType::SUCCESS;
 }
 output_t<bool> Plains::leads(int horseId, int otherHorseId) {
