@@ -73,7 +73,7 @@ StatusType Plains::leave_herd(int horseId) {
 
     // Move herd to empty_herds if it becomes empty
     if (herdNode->data->herd_horses.isEmpty()) {
-        herds.moveToTree(herdNode, make_shared<AVL_Tree<herd>>(empty_herds));
+        herds.moveToTree(herdNode,empty_herds);
     }
 
     return StatusType::SUCCESS;
@@ -112,7 +112,7 @@ StatusType Plains::join_herd(int horseId, int herdId) {
 
     // If the herd was empty, move it from empty_herds to herds
     if (empty_herds.search(herd::make_herd_node(herdId))->data->get_id() == herdId) {
-        empty_herds.moveToTree(herdNode, make_shared<AVL_Tree<herd>>(herds));  // Move to non-empty herds
+        empty_herds.moveToTree(herdNode, herds);  // Move to non-empty herds
     }
 
     return StatusType::SUCCESS;

@@ -43,7 +43,7 @@ public:
 
     bool isEmpty() { return root == nullptr; }
 
-    void moveToTree(shared_ptr<TreeNode<T>>, shared_ptr<AVL_Tree<T>>);
+    void moveToTree(shared_ptr<TreeNode<T>>, AVL_Tree<T>&);
     int max(int a, int b);
 
     shared_ptr<TreeNode<T>> getRoot() { return root; }
@@ -53,10 +53,10 @@ public:
 
 template<class T>
 void AVL_Tree<T>::moveToTree(shared_ptr<TreeNode<T>> nodeToMove,
-                shared_ptr<AVL_Tree<T>> treeToMoveTo) {
+                AVL_Tree<T>& treeToMoveTo) {
     shared_ptr<T> data = nodeToMove->data;
-    treeToMoveTo->insert(make_shared<TreeNode<T>>(data));
-    removal(nodeToMove);
+    treeToMoveTo.insert(make_shared<TreeNode<T>>(data));
+    this->removal(nodeToMove);
 
 }
 
