@@ -9,24 +9,25 @@ private:
     int herd_id;
     int follow_id;
     int versionfollow;
-    horse *follow;
+    shared_ptr<horse> follow;
 public:
-    bool isVisited;
+    bool isVisited = false;
     int get_version();
     int get_horse_id();
     int get_speed();
     int get_herd_id();
     int get_follow_id();
     int get_versionfollow();
-    horse *get_follow();
+    shared_ptr<horse> get_follow();
     void set_version(int version);
     void set_herd_id(int herd_id);
     void set_follow_id(int follow_id);
     void set_versionfollow(int versionfollow);
-    void set_follow(horse *follow);
+    void set_follow(shared_ptr<horse> follow);
     horse(int horse_id, int speed);
     static shared_ptr<TreeNode<horse>> make_horse_node(int horse_id, int speed = 0);
     horse(int horse_id);
+    int get_id() const { return horse_id; }
 
     bool operator<(const horse &other) const {
         return horse_id < other.horse_id;

@@ -43,7 +43,7 @@ int horse::get_versionfollow() {
     return versionfollow;
 }
 
-horse *horse::get_follow() {
+shared_ptr<horse> horse::get_follow() {
     return follow;
 }
 
@@ -63,7 +63,7 @@ void horse::set_versionfollow(int versionfollow) {
     this->versionfollow = versionfollow;
 }
 
-void horse::set_follow(horse *follow) {
+void horse::set_follow(shared_ptr<horse> follow) {
     this->follow = follow;
     set_follow_id(follow->get_horse_id());
     set_versionfollow(follow->get_version());

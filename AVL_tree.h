@@ -24,8 +24,7 @@ template<class T>
 class AVL_Tree {
 private:
     shared_ptr<TreeNode<T>> root;
-    void destroyTree(TreeNode<T> *node);
-    TreeNode<T> *root;
+    void destroyTree(shared_ptr<TreeNode<T>> node);
 public:
     ~AVL_Tree();
     AVL_Tree();
@@ -39,23 +38,12 @@ public:
     void Rl_rotation(shared_ptr<TreeNode<T>>);
     int get_BF(shared_ptr<TreeNode<T>>);
     AVL_Tree(T data);
-    StatusType insert(TreeNode<T> *);
-    TreeNode<T> *search(TreeNode<T> *);
-    StatusType removal(TreeNode<T> *);
 
     bool isEmpty() { return root == nullptr; }
 
-    void moveToTree(TreeNode<T> *, AVL_Tree<T> *); //TODO
-    void inorder(TreeNode<T> *, T *);
-    void LL_rotation(TreeNode<T> *);
-    void LR_rotation(TreeNode<T> *);
-    void RR_rotation(TreeNode<T> *);
-    void Rl_rotation(TreeNode<T> *);
-    int get_BF(TreeNode<T> *);
+    void moveToTree(shared_ptr<TreeNode<T>>, shared_ptr<AVL_Tree<T>>); //TODO
     int max(int a, int b);
-    void updateHeight(TreeNode<T> *);
-
-    TreeNode<T> *getRoot() { return root; }
+    shared_ptr<TreeNode<T>> getRoot() { return root; }
     void updateHeight(shared_ptr<TreeNode<T>>);
 };
 
@@ -76,13 +64,13 @@ AVL_Tree<T>::AVL_Tree(T data) {
 }
 
 template<class T>
-void AVL_Tree<T>::moveToTree(TreeNode<T> *node, AVL_Tree<T> *targetTree) {
+void AVL_Tree<T>::moveToTree(shared_ptr<TreeNode<T>> node, shared_ptr<AVL_Tree<T>> targetTree) {
     if (node == nullptr || targetTree == nullptr) {
         return;
     }
 
     // Detach the node from the current tree
-    TreeNode<T> *parent = node->parent;
+    shared_ptr<TreeNode<T>> parent = node->parent;
     if (parent) {
         if (parent->left == node) {
             parent->left = nullptr;
@@ -126,13 +114,12 @@ void AVL_Tree<T>::moveToTree(TreeNode<T> *node, AVL_Tree<T> *targetTree) {
 }
 
 template<class T>
-void AVL_Tree<T>::destroyTree(TreeNode<T> *node) {
+void AVL_Tree<T>::destroyTree(shared_ptr<TreeNode<T>> node) {
     if (node == nullptr) {
         return;
     }
     destroyTree(node->left);
     destroyTree(node->right);
-    delete node;
 }
 
 template<class T>
@@ -265,8 +252,6 @@ StatusType AVL_Tree<T>::removal(shared_ptr<TreeNode<T>> node) {
     } else {
         parent->right = child;
     }
-
-    delete target;
 
     while (parent) {
         updateHeight(parent);
