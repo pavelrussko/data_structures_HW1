@@ -11,6 +11,7 @@ private:
     int versionfollow;
     horse *follow;
 public:
+    bool isVisited;
     int get_version();
     int get_horse_id();
     int get_speed();
@@ -25,6 +26,7 @@ public:
     void set_follow(horse *follow);
     horse(int horse_id, int speed);
     static shared_ptr<TreeNode<horse>> make_horse_node(int horse_id, int speed = 0);
+    horse(int horse_id);
 
     bool operator<(const horse &other) const {
         return horse_id < other.horse_id;
@@ -39,5 +41,20 @@ public:
         versionfollow = other.versionfollow;
         follow = other.follow;
         return *this;
+    }
+
+    bool operator==(const horse &other) const {
+        return horse_id == other.horse_id;
+    }
+
+    bool operator!=(const horse &other) const {
+        return !(*this == other);
+    }
+
+    bool operator<=(int a) const {
+        if (horse_id <= a) {
+            return true;
+        }
+        return false;
     }
 };

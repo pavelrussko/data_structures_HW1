@@ -19,6 +19,4 @@ public:
     static shared_ptr<TreeNode<herd>> make_herd_node(int herdId);
 };
 
-
-
 #endif //DATA_STRUCTURES_HW1_HERD_H

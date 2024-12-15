@@ -24,7 +24,10 @@ template<class T>
 class AVL_Tree {
 private:
     shared_ptr<TreeNode<T>> root;
+    void destroyTree(TreeNode<T> *node);
+    TreeNode<T> *root;
 public:
+    ~AVL_Tree();
     AVL_Tree();
     StatusType insert(shared_ptr<TreeNode<T>>);
     shared_ptr<TreeNode<T>> search(shared_ptr<TreeNode<T>>);
@@ -35,9 +38,102 @@ public:
     void RR_rotation(shared_ptr<TreeNode<T>>);
     void Rl_rotation(shared_ptr<TreeNode<T>>);
     int get_BF(shared_ptr<TreeNode<T>>);
+    AVL_Tree(T data);
+    StatusType insert(TreeNode<T> *);
+    TreeNode<T> *search(TreeNode<T> *);
+    StatusType removal(TreeNode<T> *);
+
+    bool isEmpty() { return root == nullptr; }
+
+    void moveToTree(TreeNode<T> *, AVL_Tree<T> *); //TODO
+    void inorder(TreeNode<T> *, T *);
+    void LL_rotation(TreeNode<T> *);
+    void LR_rotation(TreeNode<T> *);
+    void RR_rotation(TreeNode<T> *);
+    void Rl_rotation(TreeNode<T> *);
+    int get_BF(TreeNode<T> *);
     int max(int a, int b);
+    void updateHeight(TreeNode<T> *);
+
+    TreeNode<T> *getRoot() { return root; }
     void updateHeight(shared_ptr<TreeNode<T>>);
 };
+
+
+template<class T>
+AVL_Tree<T>::~AVL_Tree() {
+    destroyTree(root);
+}
+
+template<class T>
+AVL_Tree<T>::AVL_Tree(T data) {
+    root = new TreeNode<T>();
+    root->data = new T(data);
+    root->left = nullptr;
+    root->right = nullptr;
+    root->parent = nullptr;
+    root->height = 1;
+}
+
+template<class T>
+void AVL_Tree<T>::moveToTree(TreeNode<T> *node, AVL_Tree<T> *targetTree) {
+    if (node == nullptr || targetTree == nullptr) {
+        return;
+    }
+
+    // Detach the node from the current tree
+    TreeNode<T> *parent = node->parent;
+    if (parent) {
+        if (parent->left == node) {
+            parent->left = nullptr;
+        } else {
+            parent->right = nullptr;
+        }
+    } else {
+        root = nullptr;
+    }
+
+    // Update heights and balance the original tree
+    while (parent) {
+        updateHeight(parent);
+        int BF = get_BF(parent);
+        if (BF > 1 || BF < -1) {
+            if (BF > 1) {
+                if (get_BF(parent->left) >= 0) {
+                    LL_rotation(parent);
+                } else {
+                    LR_rotation(parent);
+                }
+            } else {
+                if (get_BF(parent->right) <= 0) {
+                    RR_rotation(parent);
+                } else {
+                    Rl_rotation(parent);
+                }
+            }
+        }
+        parent = parent->parent;
+    }
+
+    // Reset node pointers
+    node->parent = nullptr;
+    node->left = nullptr;
+    node->right = nullptr;
+    node->height = 1;
+
+    // Insert the node into the target tree
+    targetTree->insert(node);
+}
+
+template<class T>
+void AVL_Tree<T>::destroyTree(TreeNode<T> *node) {
+    if (node == nullptr) {
+        return;
+    }
+    destroyTree(node->left);
+    destroyTree(node->right);
+    delete node;
+}
 
 template<class T>
 void AVL_Tree<T>::updateHeight(shared_ptr<TreeNode<T>> node) {
@@ -111,7 +207,7 @@ StatusType AVL_Tree<T>::insert(shared_ptr<TreeNode<T>> node) {
     }
     return StatusType::SUCCESS;
 }
-
+//oogabooga
 
 // Search function
 template<class T>
@@ -170,6 +266,7 @@ StatusType AVL_Tree<T>::removal(shared_ptr<TreeNode<T>> node) {
         parent->right = child;
     }
 
+    delete target;
 
     while (parent) {
         updateHeight(parent);
