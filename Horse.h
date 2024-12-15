@@ -9,8 +9,8 @@ private:
     int follow_id;
     int versionfollow;
     horse *follow;
-    bool isVisited;
 public:
+    bool isVisited;
     int get_version();
     int get_horse_id();
     int get_speed();

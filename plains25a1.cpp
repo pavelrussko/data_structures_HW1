@@ -161,37 +161,62 @@ output_t<bool> Plains::leads(int horseId, int otherHorseId) {
         return output_t<bool>(false);
     }
 
-    // Check if the follower is directly following the leader
-    if (followerNode->data->get_follow_id() == leaderNode->data->get_horse_id() &&
-        followerNode->data->get_versionfollow() == leaderNode->data->get_version()) {
-        return output_t<bool>(true);
-    }
-
     // Follow the chain of horses to see if the follower eventually leads the leader
-    TreeNode<horse>* currentNode = followerNode;
+    TreeNode<horse> *currentNode = followerNode;
+    bool foundLeader = false;
+
     while (currentNode) {
-        // Get the horse to follow
-        horse* nextHorse = currentNode->data->get_follow();
+        horse *currentHorse = currentNode->data;
 
-        // If there's a next horse, continue the search
-        if (nextHorse) {
-            TreeNode<horse> fakeNode(nextHorse); // Create a fake node with the next horse data
-            currentNode = horses.search(&fakeNode); // Find the corresponding node in the tree
-
-            // Check if this horse is the leader
-            if (currentNode && currentNode->data->get_horse_id() == leaderNode->data->get_horse_id() &&
-                currentNode->data->get_versionfollow() == leaderNode->data->get_version()) {
-                return output_t<bool>(true);
+        // Check for cycles
+        if (currentHorse->isVisited) {
+            // Reset all visited flags and return false for cycle detection
+            currentNode = followerNode;
+            while (currentNode) {
+                currentNode->data->isVisited = false;
+                horse *nextHorse = currentNode->data->get_follow();
+                if (!nextHorse) { break; }
+                TreeNode<horse> fakeNode(nextHorse);
+                currentNode = horses.search(&fakeNode);
             }
-        } else {
-            // No more horses to follow
-            currentNode = nullptr;
+            return output_t<bool>(false); // Cycle detected
         }
+
+        // Mark the current horse as visited
+        currentHorse->isVisited = true;
+
+        // Check if this horse is the leader
+        if (currentHorse->get_horse_id() == leaderNode->data->get_horse_id() &&
+            currentHorse->get_versionfollow() ==
+            leaderNode->data->get_version()) {
+            foundLeader = true;
+            break;
+        }
+
+        // Move to the next horse in the chain
+        horse *nextHorse = currentHorse->get_follow();
+        if (!nextHorse) {
+            break; // No more horses to follow
+        }
+
+        // Create a fake node with the next horse data and find the corresponding node in the tree
+        TreeNode<horse> fakeNode(nextHorse);
+        currentNode = horses.search(&fakeNode);
     }
 
-    // If the loop ends without finding the leader
-    return output_t<bool>(false);
+    // Reset all visited flags before returning
+    currentNode = followerNode;
+    while (currentNode) {
+        currentNode->data->isVisited = false;
+        horse *nextHorse = currentNode->data->get_follow();
+        if (!nextHorse) { break; }
+        TreeNode<horse> fakeNode(nextHorse);
+        currentNode = horses.search(&fakeNode);
+    }
+
+    return output_t<bool>(foundLeader);
 }
+
 
 //ofek
 
