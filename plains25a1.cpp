@@ -3,7 +3,7 @@
 
 #include "plains25a1.h"
 
-
+//gg
 Plains::Plains():horses(), herds(), empty_herds(){}
 
 Plains::~Plains() = default;
