@@ -35,7 +35,6 @@ public:
     StatusType insert(shared_ptr<TreeNode<T>>);
     shared_ptr<TreeNode<T>> search(shared_ptr<TreeNode<T>>);
     StatusType removal(shared_ptr<TreeNode<T>>);
-    void inorder(shared_ptr<TreeNode<T>>, T *);
     void LL_rotation(shared_ptr<TreeNode<T>>);
     void LR_rotation(shared_ptr<TreeNode<T>>);
     void RR_rotation(shared_ptr<TreeNode<T>>);
@@ -244,12 +243,6 @@ StatusType AVL_Tree<T>::removal(shared_ptr<TreeNode<T>> node) {
     return StatusType::SUCCESS;
 }
 
-// Inorder traversal function
-template<class T>
-void AVL_Tree<T>::inorder(shared_ptr<TreeNode<T>> node, T *arr) {
-    //TODO
-    return;
-}
 
 // LL rotation function
 template<class T>

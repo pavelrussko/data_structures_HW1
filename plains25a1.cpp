@@ -235,6 +235,75 @@ output_t<int> Plains::get_speed(int horseId) {
 
 
 output_t<bool> Plains::can_run_together(int herdId) {
-    //TODO: implement inorder traversal
-    return false;
+    if (herdId <= 0) {
+        return StatusType::INVALID_INPUT;
+    }
+
+    shared_ptr<TreeNode<herd>> herdNode = herds.search(
+            herd::make_herd_node(herdId));
+    if (!herdNode || herdNode->data->get_id() != herdId) {
+        return StatusType::FAILURE;
+    }
+
+    shared_ptr<horse> potential_leader = nullptr;
+    shared_ptr<TreeNode<horse>> current_horse = herdNode->data->herd_horses.getRoot();
+
+    // Run traversal to check if all horses lead to the same leader.
+    bool result = traversal(current_horse, potential_leader);
+
+    // Reset visited flags for future calls (optional; depends on usage).
+    resetVisitedFlags(current_horse);
+
+    return output_t<bool>(result);
+}
+
+void Plains::resetVisitedFlags(shared_ptr<TreeNode<horse>> node) {
+    if (!node) {
+        return;
+    }
+    node->data->isVisited = false;
+    resetVisitedFlags(node->left);
+    resetVisitedFlags(node->right);
+}
+
+bool Plains::traversal(shared_ptr<TreeNode<horse>> node,
+                       shared_ptr<horse> &potential_leader) {
+    if (!node) {
+        return true; // Base case: no horse in this subtree.
+    }
+
+    shared_ptr<horse> current = node->data;
+    shared_ptr<horse> slow = current, fast = current;
+
+    // Traverse the follow chain to detect a leader and check for cycles.
+    while (fast && fast->get_follow() &&
+           fast->get_versionfollow() == fast->get_follow()->get_version()) {
+        // Cycle detection using Floyd's Tortoise and Hare algorithm.
+        slow = slow->get_follow();
+        fast = fast->get_follow();
+        if (fast) { fast = fast->get_follow(); }
+
+        if (slow == fast) {
+            return false; // A cycle is detected.
+        }
+    }
+
+    // `current` should now point to the ultimate leader of this chain.
+    while (current->get_follow() &&
+           current->get_versionfollow() ==
+           current->get_follow()->get_version()) {
+        current = current->get_follow();
+    }
+
+    if (!potential_leader) {
+        // First leader found; set it as the potential leader.
+        potential_leader = current;
+    } else if (current != potential_leader) {
+        // If the current leader differs from the potential leader, return false.
+        return false;
+    }
+
+    // Recur for left and right children of the current node.
+    return traversal(node->left, potential_leader) &&
+           traversal(node->right, potential_leader);
 }

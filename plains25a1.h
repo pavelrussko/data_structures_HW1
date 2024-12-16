@@ -47,6 +47,9 @@ public:
 
     output_t<bool> can_run_together(int herdId);
     // } </DO-NOT-MODIFY>
+    bool traversal(shared_ptr<TreeNode<horse>> node,
+                   shared_ptr<horse> &potential_leader);
+    void resetVisitedFlags(shared_ptr<TreeNode<horse>> node);
 };
 
 #endif // PLAINS25WINTER_WET1_H_
