@@ -149,7 +149,7 @@ output_t<bool> Plains::leads(int horseId, int otherHorseId) {
     if (followerNode->data->get_herd_id() != leaderNode->data->get_herd_id()) {
         return false;
     }
-
+    shared_ptr<horse> starter = followerNode->data;//for isvisited reset
     // Follow the chain of horses to see if the follower eventually leads the leader
     shared_ptr<TreeNode<horse>> currentNode = followerNode;
     bool foundLeader = false;
@@ -159,14 +159,9 @@ output_t<bool> Plains::leads(int horseId, int otherHorseId) {
         // Check for cycles
         if (currentHorse->isVisited) {
             // if cycle detected, reset all visited flags and return false for cycle detection
-            currentNode = followerNode;
-            while (currentNode) {
-                currentNode->data->isVisited = false;
-                shared_ptr<horse> nextHorse = currentNode->data->get_follow();
-                if (!nextHorse) { break; }
-                shared_ptr<TreeNode<horse>> fakeNode = make_shared<TreeNode<horse>>(
-                        nextHorse);
-                currentNode = horses.search(fakeNode);
+            while (starter) {
+                starter->isVisited = false;
+                starter = starter->get_follow();
             }
             return false; // Cycle detected, return false
         }
@@ -175,27 +170,24 @@ output_t<bool> Plains::leads(int horseId, int otherHorseId) {
         currentHorse->isVisited = true;
 
         // Check if this horse is the leader
-        if (currentHorse->get_horse_id() == leaderNode->data->get_horse_id() &&
-            currentHorse->get_versionfollow() ==
-            leaderNode->data->get_version()) {
+        if (currentHorse->get_horse_id() == leaderNode->data->get_horse_id()) {
             foundLeader = true;
             break;
         }
-
+        if (currentHorse->get_follow() == nullptr) {//no more potential leaders
+            break;
+        }
         // Move to the next horse in the chain
-        currentHorse = currentHorse->get_follow();
-        if (!currentHorse) {
-            break; // No more horses to follow
+        if (currentHorse->get_versionfollow() ==
+            currentHorse->get_follow()->get_version()) {
+            currentHorse = currentHorse->get_follow();
         }
     }
 
     // Reset all visited flags before returning
-    while (currentNode->data->get_id() != followerNode->data->get_id()) {
-        currentNode->data->isVisited = false;
-        shared_ptr<horse> nextHorse = currentNode->data->get_follow();
-        if (!nextHorse) { break; }
-        followerNode = make_shared<TreeNode<horse>>(nextHorse);
-        currentNode = horses.search(followerNode);
+    while (starter) {
+        starter->isVisited = false;
+        starter = starter->get_follow();
     }
     return foundLeader;
 }
