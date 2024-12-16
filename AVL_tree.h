@@ -1,12 +1,9 @@
-
 #include "wet1util.h"
-
 #include <memory>
 
 using namespace std;
 
 template<class T>
-
 struct TreeNode {
     shared_ptr<T> data;
     shared_ptr<TreeNode<T>> left;
@@ -38,7 +35,7 @@ public:
     void LL_rotation(shared_ptr<TreeNode<T>>);
     void LR_rotation(shared_ptr<TreeNode<T>>);
     void RR_rotation(shared_ptr<TreeNode<T>>);
-    void Rl_rotation(shared_ptr<TreeNode<T>>);
+    void RL_rotation(shared_ptr<TreeNode<T>>);
     int get_BF(shared_ptr<TreeNode<T>>);
     AVL_Tree(T data);
 
@@ -58,33 +55,21 @@ void AVL_Tree<T>::moveToTree(shared_ptr<TreeNode<T>> nodeToMove,
     shared_ptr<T> data = nodeToMove->data;
     treeToMoveTo.insert(make_shared<TreeNode<T>>(data));
     this->removal(nodeToMove);
-
 }
 
 template<class T>
-AVL_Tree<T>::~AVL_Tree() {
-    destroyTree(root);
-}
+AVL_Tree<T>::~AVL_Tree() = default;
 
 template<class T>
 AVL_Tree<T>::AVL_Tree(T data) {
-    root = new TreeNode<T>();
-    root->data = new T(data);
-    root->left = nullptr;
-    root->right = nullptr;
-    root->parent = nullptr;
+    root = make_shared<TreeNode<T>>(
+            make_shared<T>(data)); // Using make_shared for root node
     root->height = 1;
 }
 
-
+// Constructor for empty tree
 template<class T>
-void AVL_Tree<T>::destroyTree(shared_ptr<TreeNode<T>> node) {
-    if (node == nullptr) {
-        return;
-    }
-    destroyTree(node->left);
-    destroyTree(node->right);
-}
+AVL_Tree<T>::AVL_Tree() : root(nullptr) {}
 
 template<class T>
 void AVL_Tree<T>::updateHeight(shared_ptr<TreeNode<T>> node) {
@@ -94,16 +79,13 @@ void AVL_Tree<T>::updateHeight(shared_ptr<TreeNode<T>> node) {
     node->height = 1 + max(leftHeight, rightHeight);
 }
 
-// Constructor for AVL_Tree
-template<class T>
-AVL_Tree<T>::AVL_Tree() : root(nullptr) {}
-
-// Insert function
 template<class T>
 StatusType AVL_Tree<T>::insert(shared_ptr<TreeNode<T>> node) {
     if (*(node->data) < 0) {
         return StatusType::INVALID_INPUT;
     }
+
+    // Handle empty tree case
     if (root == nullptr) {
         root = node;
         node->parent = nullptr;
@@ -112,10 +94,14 @@ StatusType AVL_Tree<T>::insert(shared_ptr<TreeNode<T>> node) {
         node->height = 1;
         return StatusType::SUCCESS;
     }
+
+    // Check for duplicates
     shared_ptr<TreeNode<T>> current = search(node);
     if (current != nullptr && *(current->data) == *(node->data)) {
         return StatusType::FAILURE;
     }
+
+    // Insertion process
     current = root;
     shared_ptr<TreeNode<T>> parent = nullptr;
     while (current != nullptr) {
@@ -126,39 +112,52 @@ StatusType AVL_Tree<T>::insert(shared_ptr<TreeNode<T>> node) {
             current = current->right;
         }
     }
+
     node->parent = parent;
     node->left = nullptr;
     node->right = nullptr;
     node->height = 1;
+
+    // Insert the node
     if (*(node->data) < *(parent->data)) {
         parent->left = node;
     } else {
         parent->right = node;
     }
+
+    // Rebalance the tree by traversing up
     current = node->parent;
     while (current != nullptr) {
-        updateHeight(current);
-        int BF = get_BF(current);
+        updateHeight(current);  // Ensure height is updated before checking BF
+        int BF = get_BF(current);  // Calculate balance factor
+
+        // Check if the node is unbalanced and rotate
         if (BF > 1 || BF < -1) {
             if (BF > 1) {
                 if (get_BF(current->left) >= 0) {
                     LL_rotation(current);
+                    return StatusType::SUCCESS;
                 } else {
                     LR_rotation(current);
+                    return StatusType::SUCCESS;
                 }
             } else {
                 if (get_BF(current->right) <= 0) {
                     RR_rotation(current);
+                    return StatusType::SUCCESS;
                 } else {
-                    Rl_rotation(current);
+                    RL_rotation(current);
+                    return StatusType::SUCCESS;
                 }
             }
         }
+
         current = current->parent;
     }
+
     return StatusType::SUCCESS;
 }
-//oogabooga
+
 
 // Search function
 template<class T>
@@ -233,7 +232,7 @@ StatusType AVL_Tree<T>::removal(shared_ptr<TreeNode<T>> node) {
                 if (get_BF(parent->right) <= 0) {
                     RR_rotation(parent);
                 } else {
-                    Rl_rotation(parent);
+                    RL_rotation(parent);
                 }
             }
         }
@@ -243,19 +242,35 @@ StatusType AVL_Tree<T>::removal(shared_ptr<TreeNode<T>> node) {
     return StatusType::SUCCESS;
 }
 
-
 // LL rotation function
 template<class T>
 void AVL_Tree<T>::LL_rotation(shared_ptr<TreeNode<T>> node) {
     shared_ptr<TreeNode<T>> temp = node->left->right;
     shared_ptr<TreeNode<T>> child = node->left;
+
+    // Update links
     node->left = temp;
+    if (temp != nullptr) {
+        temp->parent = node;
+    }
     child->parent = node->parent;
     child->right = node;
     node->parent = child;
+
+    // Update parent-child relationships
+    if (child->parent == nullptr) {
+        root = child;  // If the parent is null, the child becomes the new root
+    } else if (child->parent->left == node) {
+        child->parent->left = child;
+    } else {
+        child->parent->right = child;
+    }
+
+    // Update heights
     updateHeight(node);
     updateHeight(child);
 }
+
 
 // LR rotation function
 template<class T>
@@ -273,13 +288,15 @@ void AVL_Tree<T>::RR_rotation(shared_ptr<TreeNode<T>> node) {
         newRoot->left->parent = node;
     }
     newRoot->parent = node->parent;
-    if (node->parent == nullptr) {
+
+    if (node->parent == nullptr) {  // If the node is the root
         root = newRoot;
     } else if (node == node->parent->left) {
         node->parent->left = newRoot;
     } else {
         node->parent->right = newRoot;
     }
+
     newRoot->left = node;
     node->parent = newRoot;
 
@@ -288,9 +305,10 @@ void AVL_Tree<T>::RR_rotation(shared_ptr<TreeNode<T>> node) {
     updateHeight(newRoot);
 }
 
+
 // RL rotation function
 template<class T>
-void AVL_Tree<T>::Rl_rotation(shared_ptr<TreeNode<T>> node) {
+void AVL_Tree<T>::RL_rotation(shared_ptr<TreeNode<T>> node) {
     LL_rotation(node->right);
     RR_rotation(node);
 }
@@ -298,17 +316,14 @@ void AVL_Tree<T>::Rl_rotation(shared_ptr<TreeNode<T>> node) {
 
 template<class T>
 int AVL_Tree<T>::get_BF(shared_ptr<TreeNode<T>> node) {
-    if (!node->left && !node->right) {
+    if (node == nullptr) {
         return 0;
     }
-    if (!node->left) {
-        return -node->right->height;
-    }
-    if (!node->right) {
-        return node->left->height;
-    }
-    return node->left->height - node->right->height;
+    int leftHeight = (node->left) ? node->left->height : 0;
+    int rightHeight = (node->right) ? node->right->height : 0;
+    return leftHeight - rightHeight;
 }
+
 
 template<class T>
 int AVL_Tree<T>::max(int a, int b) {
