@@ -2,6 +2,7 @@
 #include "wet1util.h"
 
 #include <memory>
+
 using namespace std;
 
 template<class T>
@@ -177,7 +178,7 @@ shared_ptr<TreeNode<T>> AVL_Tree<T>::search(shared_ptr<TreeNode<T>> node) {
 // Removal function
 template<class T>
 StatusType AVL_Tree<T>::removal(shared_ptr<TreeNode<T>> node) {
-    if(!root){
+    if (!root) {
         return StatusType::FAILURE;
     }
     if (*(node->data) <= 0) {
@@ -187,7 +188,7 @@ StatusType AVL_Tree<T>::removal(shared_ptr<TreeNode<T>> node) {
     if (target == nullptr || *(target->data) != *(node->data)) {
         return StatusType::FAILURE;
     }
-    if(target == root && !target->left && !target->right){
+    if (target == root && !target->left && !target->right) {
         root = nullptr;
         target->parent = nullptr;
         return StatusType::SUCCESS;
