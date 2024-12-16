@@ -154,8 +154,19 @@ StatusType Plains::follow(int horseId, int horseToFollowId) {
     herdFollower->data->set_follow(herdToFollow->data);
     herdFollower->data->set_versionfollow(herdToFollow->data->get_version());
 
+    // If both horses are trying to follow each other, we need to ensure the follow relationship works both ways.
+    if (follower->data->get_horse_id() == toFollow->data->get_horse_id()) {
+        toFollow->data->set_follow(follower->data);
+        toFollow->data->set_versionfollow(follower->data->get_version());
+
+        // Update the version for herd-level horses
+        herdToFollow->data->set_follow(herdFollower->data);
+        herdToFollow->data->set_versionfollow(herdFollower->data->get_version());
+    }
+
     return StatusType::SUCCESS;
 }
+
 
 
 output_t<int> Plains::get_speed(int horseId) {
