@@ -165,17 +165,12 @@ StatusType AVL_Tree<T>::insert(shared_ptr<TreeNode<T>> node) {
 template<class T>
 shared_ptr<TreeNode<T>> AVL_Tree<T>::search(shared_ptr<TreeNode<T>> node) {
     shared_ptr<TreeNode<T>> current = root;
-    shared_ptr<TreeNode<T>> temp_parent = nullptr;
     while (current != nullptr && *(current->data) != *(node->data)) {
         if (*(node->data) < *(current->data)) {
             current = current->left;
         } else {
             current = current->right;
         }
-        temp_parent = current->parent;
-    }
-    if (!current) {
-        return temp_parent;
     }
     return current;
 }

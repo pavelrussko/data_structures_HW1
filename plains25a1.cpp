@@ -133,7 +133,6 @@ output_t<bool> Plains::leads(int horseId, int otherHorseId) {
     if (horseId <= 0 || otherHorseId <= 0) {
         return false; // Invalid input check
     }
-
     // Search for the follower and leader in the AVL tree
     shared_ptr<TreeNode<horse>> followerNode = horses.search(
             horse::make_horse_node(horseId));
@@ -212,10 +211,7 @@ StatusType Plains::follow(int horseId, int horseToFollowId) {
     shared_ptr<TreeNode<horse>> toFollow = horses.search(
             make_shared<TreeNode<horse>>(
                     make_shared<horse>(horseToFollowId, 0)));
-    //if horses arent found
-    printf("follower id: %d, toFollow id: %d and desired is follower: %d and toFollow %d",
-           follower->data->get_horse_id(),
-           toFollow->data->get_horse_id(), horseId, horseToFollowId);
+    //if horses dont exist
     if (follower->data->get_horse_id() != horseId ||
         toFollow->data->get_horse_id() != horseToFollowId) {
         return StatusType::FAILURE;
