@@ -158,8 +158,7 @@ StatusType AVL_Tree<T>::insert(shared_ptr<TreeNode<T>> node) {
     return StatusType::SUCCESS;
 }
 
-
-// Search function
+// search function
 template<class T>
 shared_ptr<TreeNode<T>> AVL_Tree<T>::search(shared_ptr<TreeNode<T>> node) {
     shared_ptr<TreeNode<T>> current = root;
