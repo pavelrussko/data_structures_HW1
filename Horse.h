@@ -15,6 +15,7 @@ private:
     shared_ptr<horse> follow;
 public:
     bool isVisited = false;
+    bool isLead = false;
     int get_version();
     int get_horse_id();
     int get_speed();

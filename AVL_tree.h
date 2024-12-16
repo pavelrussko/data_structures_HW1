@@ -25,7 +25,6 @@ template<class T>
 class AVL_Tree {
 private:
     shared_ptr<TreeNode<T>> root;
-    void destroyTree(shared_ptr<TreeNode<T>> node);
 public:
     ~AVL_Tree();
     AVL_Tree();
@@ -104,15 +103,16 @@ StatusType AVL_Tree<T>::insert(shared_ptr<TreeNode<T>> node) {
     // Insertion process
     current = root;
     shared_ptr<TreeNode<T>> parent = nullptr;
-    while (current != nullptr) {
+/*    while (current != nullptr) {
         parent = current;
         if (*(node->data) < *(current->data)) {
             current = current->left;
         } else {
             current = current->right;
         }
-    }
+    }*/
 
+    parent = search(node);
     node->parent = parent;
     node->left = nullptr;
     node->right = nullptr;
@@ -163,12 +163,17 @@ StatusType AVL_Tree<T>::insert(shared_ptr<TreeNode<T>> node) {
 template<class T>
 shared_ptr<TreeNode<T>> AVL_Tree<T>::search(shared_ptr<TreeNode<T>> node) {
     shared_ptr<TreeNode<T>> current = root;
+    shared_ptr<TreeNode<T>> temp_parent = nullptr;
     while (current != nullptr && *(current->data) != *(node->data)) {
+        temp_parent = current;
         if (*(node->data) < *(current->data)) {
             current = current->left;
         } else {
             current = current->right;
         }
+    }
+    if (!current) {
+        return temp_parent;
     }
     return current;
 }
