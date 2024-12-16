@@ -1,5 +1,10 @@
 #include "Herd.h"
 
+// Destructor for herd
+herd::~herd() {
+    // No need for anything special.
+}
+
 // Comparison operator: herd_id <= integer
 bool herd::operator<=(int a) const {
     return herd_id <= a;
@@ -21,7 +26,18 @@ bool herd::operator!=(const herd& other) const {
 }
 
 // Static method to create a TreeNode containing a herd
-shared_ptr<TreeNode<herd>> herd::make_herd_node(int herdId) {
-    auto toInsert = make_shared<herd>(herdId);
-    return make_shared<TreeNode<herd>>(toInsert);
+TreeNode<herd>* herd::make_herd_node(int herdId) {
+    return new TreeNode<herd>(new herd(herdId));
+}
+
+herd& herd::operator=(const herd& other) {
+    if (this == &other) {
+        return *this; // Handle self-assignment
+    }
+
+    // Copy the herd_id
+    herd_id = other.herd_id;
+    herd_horses = other.herd_horses;
+
+    return *this;
 }

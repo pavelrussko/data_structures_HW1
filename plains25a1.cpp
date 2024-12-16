@@ -3,7 +3,6 @@
 
 #include "plains25a1.h"
 
-//gg
 Plains::Plains() : horses(), herds(), empty_herds() {}
 
 Plains::~Plains() = default;
@@ -13,8 +12,8 @@ StatusType Plains::add_herd(int herdId) {
         return StatusType::INVALID_INPUT;
     }
 
-    return empty_herds.insert(herd::make_herd_node(herdId));
-
+    TreeNode<herd>* newHerdNode = herd::make_herd_node(herdId);
+    return empty_herds.insert(newHerdNode);
 }
 
 StatusType Plains::remove_herd(int herdId) {
@@ -22,26 +21,22 @@ StatusType Plains::remove_herd(int herdId) {
         return StatusType::INVALID_INPUT;
     }
 
-    // Check in empty_herds
-    shared_ptr<TreeNode<herd>> emptyHerdNode = empty_herds.search(
-            herd::make_herd_node(herdId));
+    TreeNode<herd>* emptyHerdNode = empty_herds.search(herd::make_herd_node(herdId));
     if (emptyHerdNode) {
         empty_herds.removal(emptyHerdNode);
         return StatusType::SUCCESS;
     }
 
-    // Check in herds
-    shared_ptr<TreeNode<herd> > nonEmptyHerdNode = herds.search(
-            herd::make_herd_node(herdId));
+    TreeNode<herd>* nonEmptyHerdNode = herds.search(herd::make_herd_node(herdId));
     if (nonEmptyHerdNode) {
         if (!nonEmptyHerdNode->data->herd_horses.isEmpty()) {
-            return StatusType::FAILURE; // now allowed to remove a herd with horses
+            return StatusType::FAILURE; // Not allowed to remove a herd with horses
         }
         herds.removal(nonEmptyHerdNode);
         return StatusType::SUCCESS;
     }
 
-    return StatusType::FAILURE; // Herd not found at all
+    return StatusType::FAILURE; // Herd not found
 }
 
 StatusType Plains::leave_herd(int horseId) {
@@ -49,44 +44,35 @@ StatusType Plains::leave_herd(int horseId) {
         return StatusType::INVALID_INPUT;
     }
 
-    // Create a fake node for the horse
-    horse horseToLeave(horseId);
-    // Search for the horse
-    shared_ptr<TreeNode<horse>> horseNode = horses.search(
-            horse::make_horse_node(horseId));
+    TreeNode<horse>* horseNode = horses.search(horse::make_horse_nodey(horseId, 0));
     if (!horseNode || horseNode->data->get_herd_id() == -1) {
-        return StatusType::FAILURE;
+        return StatusType::FAILURE; // Horse doesn't exist or is not in a herd
     }
 
     int herdId = horseNode->data->get_herd_id();
-
-    // Find the herd the horse belongs to
-    herd herdToLeave(herdId);
-    shared_ptr<TreeNode<herd>> herdNode = herds.search(
-            herd::make_herd_node(herdId));
+    TreeNode<herd>* herdNode = herds.search(herd::make_herd_node(herdId));
     if (!herdNode) {
-        return StatusType::FAILURE;
+        return StatusType::FAILURE; // Herd not found
     }
 
-    // Remove the horse from the herd
-    horseNode->data->set_version(horseNode->data->get_version() + 1);
     horseNode->data->set_herd_id(-1);
-
     herdNode->data->herd_horses.removal(horseNode);
 
-    // Move herd to empty_herds if it becomes empty
     if (herdNode->data->herd_horses.isEmpty()) {
-        herds.moveToTree(herdNode, empty_herds);
+        herds.removal(herdNode);
+        empty_herds.insert(herdNode);
     }
 
     return StatusType::SUCCESS;
 }
 
 StatusType Plains::add_horse(int horseId, int speed) {
-    shared_ptr<horse> horseToInsert = make_shared<horse>(horseId, speed);
-    shared_ptr<TreeNode<horse>> NodeToInsert = make_shared<TreeNode<horse>>(
-            horseToInsert);
-    return horses.insert(NodeToInsert);//add node maker?
+    if (horseId <= 0 || speed < 0) {
+        return StatusType::INVALID_INPUT;
+    }
+
+    TreeNode<horse>* newHorseNode = horse::make_horse_nodey(horseId, speed);
+    return horses.insert(newHorseNode);
 }
 
 StatusType Plains::join_herd(int horseId, int herdId) {
@@ -95,38 +81,95 @@ StatusType Plains::join_herd(int horseId, int herdId) {
     }
 
     // Search for the herd in both herds and empty_herds
-    shared_ptr<TreeNode<herd>> herdNode = herds.search(
-            herd::make_herd_node(herdId));
-    if (!herdNode || herdNode->data->get_id() !=
-                     herdId) {  // Herd not found in non-empty herds, check empty herds
+    TreeNode<herd>* herdNode = herds.search(herd::make_herd_node(herdId));
+    if (!herdNode || herdNode->data->get_id() != herdId) {  // Herd not found in non-empty herds, check empty herds
         herdNode = empty_herds.search(herd::make_herd_node(herdId));
-        if (herdNode->data->get_id() != herdId) {  // Herd not found at all
+        if (!herdNode || herdNode->data->get_id() != herdId) {  // Herd not found at all
             return StatusType::FAILURE;
         }
     }
 
     // Search for the horse
-    shared_ptr<TreeNode<horse>> horseNode = horses.search(
-            horse::make_horse_node(horseId));
-    if (horseNode->data->get_id() != horseId ||
-        horseNode->data->get_herd_id() !=
-        -1) {  // Horse doesn't exist or is already in a herd
+    TreeNode<horse>* horseNode = horses.search(horse::make_horse_nodey(horseId,0));
+    if (!horseNode || horseNode->data->get_id() != horseId || horseNode->data->get_herd_id() != -1) {  // Horse doesn't exist or is already in a herd
         return StatusType::FAILURE;
     }
 
     // Add the horse to the herd
     horseNode->data->set_herd_id(herdId);  // Update horse's herd ID
-    herdNode->data->herd_horses.insert(make_shared<TreeNode<horse>>(
-            horseNode->data));  // Insert horse into the herd
+    herdNode->data->herd_horses.insert(horse::make_horse_node(horseNode->data));  // Insert horse into the herd
 
     // If the herd was empty, move it from empty_herds to herds
-    if (!empty_herds.isEmpty()) {
-        if (empty_herds.search(herd::make_herd_node(herdId))->data->get_id() ==
-            herdId) {
-            empty_herds.moveToTree(herdNode, herds);  // Move to non-empty herds
-        }
+    TreeNode<herd>* herdNodeSearchResult = empty_herds.search(herdNode);
+    if (!herdNodeSearchResult || herdNodeSearchResult->data->get_id() == herdId) {
+        empty_herds.detach(herdNode);// Safely remove and delete the node
+        herds.insert(herdNode);  // Insert new node with the copied data
     }
     return StatusType::SUCCESS;
+}
+
+StatusType Plains::follow(int horseId, int horseToFollowId) {
+    // Input check
+    if (horseId <= 0 || horseToFollowId <= 0 || horseId == horseToFollowId) {
+        return StatusType::INVALID_INPUT;
+    }
+
+    // Find the horses in the global horses tree
+    TreeNode<horse>* follower = horses.search(horse::make_horse_nodey(horseId, 0));
+    TreeNode<horse>* toFollow = horses.search(horse::make_horse_nodey(horseToFollowId, 0));
+
+    // If either horse doesn't exist in the global horses tree, return failure
+    if (!follower || !toFollow || follower->data->get_horse_id() != horseId || toFollow->data->get_horse_id() != horseToFollowId) {
+        return StatusType::FAILURE;
+    }
+
+    // Ensure the horses belong to the same herd
+    if (follower->data->get_herd_id() != toFollow->data->get_herd_id()) {
+        return StatusType::FAILURE;
+    }
+
+    // Find the herd node in the herds tree
+    TreeNode<herd>* herdNode = herds.search(herd::make_herd_node(follower->data->get_herd_id()));
+    if (!herdNode) {
+        return StatusType::FAILURE;
+    }
+
+    // Find the follower and toFollow horses within the herd's horses tree
+    TreeNode<horse>* herdFollower = herdNode->data->herd_horses.search(horse::make_horse_nodey(horseId, 0));
+    TreeNode<horse>* herdToFollow = herdNode->data->herd_horses.search(horse::make_horse_nodey(horseToFollowId, 0));
+
+    // If horses aren't found in the herd's horses tree, return failure
+    if (!herdFollower || !herdToFollow || herdFollower->data->get_horse_id() != horseId || herdToFollow->data->get_horse_id() != horseToFollowId) {
+        return StatusType::FAILURE;
+    }
+
+    // Set the follow relationship in both the global tree and the herd's tree
+    // Set follower to follow toFollow in both the global horses tree and the herd_horses tree
+
+    // Set global follow relationship
+    follower->data->set_follow(toFollow->data);
+    follower->data->set_versionfollow(toFollow->data->get_version());
+
+    // Set herd-level follow relationship
+    herdFollower->data->set_follow(herdToFollow->data);
+    herdFollower->data->set_versionfollow(herdToFollow->data->get_version());
+
+    return StatusType::SUCCESS;
+}
+
+
+output_t<int> Plains::get_speed(int horseId) {
+    if (horseId <= 0) {
+        return StatusType::INVALID_INPUT; // INVALID_INPUT for invalid IDs
+    }
+
+    TreeNode<horse>* horseNode = horses.search(horse::make_horse_nodey(horseId,0));
+
+    if (!horseNode || horseNode->data->get_horse_id() != horseId) {
+        return StatusType::FAILURE; // Horse not found
+    }
+
+    return horseNode->data->get_speed();
 }
 
 output_t<bool> Plains::leads(int horseId, int otherHorseId) {
@@ -134,31 +177,25 @@ output_t<bool> Plains::leads(int horseId, int otherHorseId) {
         return false; // Invalid input check
     }
     // Search for the follower and leader in the AVL tree
-    shared_ptr<TreeNode<horse>> followerNode = horses.search(
-            horse::make_horse_node(horseId));
-    shared_ptr<TreeNode<horse>> leaderNode = horses.search(
-            horse::make_horse_node(otherHorseId));
+    TreeNode<horse>* followerNode = horses.search(horse::make_horse_nodey(horseId,0));
+    TreeNode<horse>* leaderNode = horses.search(horse::make_horse_nodey(otherHorseId,0));
 
-
-    // If horses dont exist, return false
-    if (followerNode->data->get_id() != horseId ||
-        leaderNode->data->get_id() != otherHorseId) {
+    // If horses don't exist, return false
+    if (followerNode->data->get_id() != horseId || leaderNode->data->get_id() != otherHorseId) {
         return false;
     }
-    // if horses arent in the same herd
+    // If horses aren't in the same herd
     if (followerNode->data->get_herd_id() != leaderNode->data->get_herd_id()) {
         return false;
     }
-    shared_ptr<horse> starter = followerNode->data;//for isvisited reset
+    horse* starter = followerNode->data; // For isVisited reset
     // Follow the chain of horses to see if the follower eventually leads the leader
-    shared_ptr<TreeNode<horse>> currentNode = followerNode;
+    horse* currentHorse = followerNode->data;
     bool foundLeader = false;
-    shared_ptr<horse> currentHorse = currentNode->data;
     while (currentHorse) {
-
         // Check for cycles
         if (currentHorse->isVisited) {
-            // if cycle detected, reset all visited flags and return false for cycle detection
+            // If cycle detected, reset all visited flags and return false for cycle detection
             while (starter) {
                 starter->isVisited = false;
                 starter = starter->get_follow();
@@ -174,12 +211,11 @@ output_t<bool> Plains::leads(int horseId, int otherHorseId) {
             foundLeader = true;
             break;
         }
-        if (currentHorse->get_follow() == nullptr) {//no more potential leaders
+        if (currentHorse->get_follow() == nullptr) { // No more potential leaders
             break;
         }
         // Move to the next horse in the chain
-        if (currentHorse->get_versionfollow() ==
-            currentHorse->get_follow()->get_version()) {
+        if (currentHorse->get_versionfollow() == currentHorse->get_follow()->get_version()) {
             currentHorse = currentHorse->get_follow();
         }
     }
@@ -192,72 +228,31 @@ output_t<bool> Plains::leads(int horseId, int otherHorseId) {
     return foundLeader;
 }
 
-StatusType Plains::follow(int horseId, int horseToFollowId) {
-    //input check
-    if (horseId <= 0 || horseToFollowId <= 0 || horseId == horseToFollowId) {
-        return StatusType::INVALID_INPUT;
-    }
-    //find horses
-    shared_ptr<TreeNode<horse>> follower = horses.search(
-            make_shared<TreeNode<horse>>(make_shared<horse>(horseId, 0)));
-    shared_ptr<TreeNode<horse>> toFollow = horses.search(
-            make_shared<TreeNode<horse>>(
-                    make_shared<horse>(horseToFollowId, 0)));
-    //if horses dont exist
-    if (follower->data->get_horse_id() != horseId ||
-        toFollow->data->get_horse_id() != horseToFollowId) {
-        return StatusType::FAILURE;
-    }
-    //if horses arent in the same herd
-    if (follower->data->get_herd_id() != toFollow->data->get_herd_id()) {
-        return StatusType::FAILURE;
-    }
-    //set follow
-    follower->data->set_follow(toFollow->data);
-    follower->data->set_versionfollow(toFollow->data->get_version());
-    return StatusType::SUCCESS;
-}
-
-output_t<int> Plains::get_speed(int horseId) {
-    if (horseId <= 0) {
-        return StatusType::INVALID_INPUT; // INVALID_INPUT for invalid IDs
-    }
-
-    shared_ptr<TreeNode<horse>> horseNode = horses.search(
-            horse::make_horse_node(horseId));
-
-    if (!horseNode || horseNode->data->get_horse_id() != horseId) {
-        return StatusType::FAILURE; // Horse not found
-    }
-
-    return horseNode->data->get_speed();
-}
-
-
 output_t<bool> Plains::can_run_together(int herdId) {
     if (herdId <= 0) {
         return StatusType::INVALID_INPUT;
     }
 
-    shared_ptr<TreeNode<herd>> herdNode = herds.search(
-            herd::make_herd_node(herdId));
+    TreeNode<herd>* herdNode = herds.search(herd::make_herd_node(herdId));
     if (!herdNode || herdNode->data->get_id() != herdId) {
         return StatusType::FAILURE;
     }
 
-    shared_ptr<horse> potential_leader = nullptr;
-    shared_ptr<TreeNode<horse>> current_horse = herdNode->data->herd_horses.getRoot();
+    horse* potential_leader = nullptr;
+    TreeNode<horse>* current_horse = herdNode->data->herd_horses.getRoot();
 
     // Run traversal to check if all horses lead to the same leader.
     bool result = traversal(current_horse, potential_leader);
 
-    // Reset visited flags for future calls (optional; depends on usage).
+    // Reset visited flags for future calls
     resetVisitedFlags(current_horse);
 
     return output_t<bool>(result);
 }
 
-void Plains::resetVisitedFlags(shared_ptr<TreeNode<horse>> node) {
+
+
+void Plains::resetVisitedFlags(TreeNode<horse>* node) {
     if (!node) {
         return;
     }
@@ -266,44 +261,52 @@ void Plains::resetVisitedFlags(shared_ptr<TreeNode<horse>> node) {
     resetVisitedFlags(node->right);
 }
 
-bool Plains::traversal(shared_ptr<TreeNode<horse>> node,
-                       shared_ptr<horse> &potential_leader) {
+bool Plains::traversal(TreeNode<horse>* node, horse*& potential_leader) {
     if (!node) {
         return true; // Base case: no horse in this subtree.
     }
 
-    shared_ptr<horse> current = node->data;
-    shared_ptr<horse> slow = current, fast = current;
+    horse* current = node->data;
 
-    // Traverse the follow chain to detect a leader and check for cycles.
+    // Ensure the horse is not visited
+    if (current->isVisited) {
+        return true; // Prevent revisiting a horse
+    }
+
+    // Check for cycles and identify the leader
+    horse* slow = current, *fast = current;
+
+    // Traverse the follow chain to detect a cycle
     while (fast && fast->get_follow() &&
            fast->get_versionfollow() == fast->get_follow()->get_version()) {
-        // Cycle detection using Floyd's Tortoise and Hare algorithm.
         slow = slow->get_follow();
         fast = fast->get_follow();
-        if (fast) { fast = fast->get_follow(); }
+        if (fast) fast = fast->get_follow();
 
+        // If a cycle is detected, return false
         if (slow == fast) {
             return false; // A cycle is detected.
         }
-    }
+           }
 
-    // `current` should now point to the ultimate leader of this chain.
+    // Now `current` should be pointing to the last horse in the follow chain (the leader).
     while (current->get_follow() &&
-           current->get_versionfollow() ==
-           current->get_follow()->get_version()) {
+           current->get_versionfollow() == current->get_follow()->get_version()) {
         current = current->get_follow();
-    }
+           }
 
+    // Set or check the leader consistency
     if (!potential_leader) {
-        // First leader found; set it as the potential leader.
-        potential_leader = current;
+        potential_leader = current; // Set the first leader
     } else if (current != potential_leader) {
-        // If the current leader differs from the potential leader, return false.
-        return false;
+        return false; // Different leader, horses can't run together
     }
 
-    // Recur for left and right children of the current node.
-    return traversal(node->left, potential_leader) &&
-           traversal(node->right, potential_leader);
+    // Mark the current horse as visited
+    current->isVisited = true;
+
+    // Continue the traversal for left and right subtrees
+    return traversal(node->left, potential_leader) && traversal(node->right, potential_leader);
 }
+
+

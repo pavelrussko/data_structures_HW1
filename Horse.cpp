@@ -1,23 +1,4 @@
-//
-// Created by Ofek on 11/12/2024.
-//
 #include "Horse.h"
-
-horse::horse(int horse_id, int speed) : horse_id(horse_id), version(0), speed(speed),
-                                        herd_id(-1), follow_id(-1),
-                                        versionfollow(0), follow(nullptr) {
-    /*if (speed <= 0 || horse_id <= 0) {
-        throw StatusType::INVALID_INPUT; //change it
-    }*/
-}
-
-horse::horse(int horse_id) : horse_id(horse_id), version(0), speed(0),
-                             herd_id(-1), follow_id(-1),
-                             versionfollow(0), follow(nullptr) {
-  /*  if (horse_id <= 0) {
-        throw StatusType::INVALID_INPUT; //change it
-    }*/
-}
 
 int horse::get_version() {
     return version;
@@ -43,7 +24,7 @@ int horse::get_versionfollow() {
     return versionfollow;
 }
 
-shared_ptr<horse> horse::get_follow() {
+horse* horse::get_follow() {
     return follow;
 }
 
@@ -63,14 +44,19 @@ void horse::set_versionfollow(int versionfollow) {
     this->versionfollow = versionfollow;
 }
 
-void horse::set_follow(shared_ptr<horse> follow) {
+void horse::set_follow(horse* follow) {
     this->follow = follow;
-    set_follow_id(follow->get_horse_id());
-    set_versionfollow(follow->get_version());
 }
 
-shared_ptr<TreeNode<horse>> horse::make_horse_node(int horse_id, int speed) {
-    shared_ptr<horse> toInsert = make_shared<horse>(horse_id, speed);
-    shared_ptr<TreeNode<horse>> NodeToInsert = make_shared<TreeNode<horse>>(toInsert);
-    return NodeToInsert;
+horse::horse(int horse_id, int speed) : horse_id(horse_id), speed(speed), herd_id(-1), follow(nullptr) {}
+
+TreeNode<horse>* horse::make_horse_nodey(int horse_id, int speed) {
+    return new TreeNode<horse>(new horse(horse_id, speed));
 }
+
+TreeNode<horse>* horse::make_horse_node(horse* horse_ptr) {
+    TreeNode<horse>* new_node = new TreeNode<horse>(new horse(*horse_ptr));
+    return new_node;
+}
+
+horse::horse(int horse_id) : horse_id(horse_id),herd_id(-1), follow(nullptr) {}

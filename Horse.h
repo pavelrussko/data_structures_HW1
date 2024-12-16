@@ -1,9 +1,6 @@
-
 #include "wet1util.h"
-#include <memory>
 #include "AVL_tree.h"
-using namespace std;
-//ddd
+
 class horse {
 private:
     int horse_id;
@@ -12,7 +9,7 @@ private:
     int herd_id;
     int follow_id;
     int versionfollow;
-    shared_ptr<horse> follow;
+    horse* follow;
 public:
     bool isVisited = false;
     bool isLead = false;
@@ -22,14 +19,15 @@ public:
     int get_herd_id();
     int get_follow_id();
     int get_versionfollow();
-    shared_ptr<horse> get_follow();
+    horse* get_follow();
     void set_version(int version);
     void set_herd_id(int herd_id);
     void set_follow_id(int follow_id);
     void set_versionfollow(int versionfollow);
-    void set_follow(shared_ptr<horse> follow);
+    void set_follow(horse* follow);
     horse(int horse_id, int speed);
-    static shared_ptr<TreeNode<horse>> make_horse_node(int horse_id, int speed = 0);
+    static TreeNode<horse>* make_horse_node(horse* horse_ptr);
+    static TreeNode<horse>* make_horse_nodey(int horse_id, int speed);
     horse(int horse_id);
     int get_id() const { return horse_id; }
 
@@ -57,9 +55,6 @@ public:
     }
 
     bool operator<=(int a) const {
-        if (horse_id <= a) {
-            return true;
-        }
-        return false;
+        return horse_id <= a;
     }
 };
