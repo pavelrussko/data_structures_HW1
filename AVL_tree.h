@@ -14,13 +14,14 @@ struct TreeNode {
     shared_ptr<TreeNode<T>> parent;
     int height;
 
-    TreeNode(shared_ptr<T> data, shared_ptr<TreeNode<T>> left = nullptr, shared_ptr<TreeNode<T>> right = nullptr,
-             shared_ptr<TreeNode<T>> parent = nullptr, int height = 0):
-             data(data),
-             left(left),
-             right(right),
-             parent(parent),
-             height(height){}
+    TreeNode(shared_ptr<T> data, shared_ptr<TreeNode<T>> left = nullptr,
+             shared_ptr<TreeNode<T>> right = nullptr,
+             shared_ptr<TreeNode<T>> parent = nullptr, int height = 0) :
+            data(data),
+            left(left),
+            right(right),
+            parent(parent),
+            height(height) {}
 };
 
 template<class T>
@@ -44,7 +45,7 @@ public:
 
     bool isEmpty() { return root == nullptr; }
 
-    void moveToTree(shared_ptr<TreeNode<T>>, AVL_Tree<T>&);
+    void moveToTree(shared_ptr<TreeNode<T>>, AVL_Tree<T> &);
     int max(int a, int b);
 
     shared_ptr<TreeNode<T>> getRoot() { return root; }
@@ -54,7 +55,7 @@ public:
 
 template<class T>
 void AVL_Tree<T>::moveToTree(shared_ptr<TreeNode<T>> nodeToMove,
-                AVL_Tree<T>& treeToMoveTo) {
+                             AVL_Tree<T> &treeToMoveTo) {
     shared_ptr<T> data = nodeToMove->data;
     treeToMoveTo.insert(make_shared<TreeNode<T>>(data));
     this->removal(nodeToMove);
@@ -75,7 +76,6 @@ AVL_Tree<T>::AVL_Tree(T data) {
     root->parent = nullptr;
     root->height = 1;
 }
-
 
 
 template<class T>
@@ -165,12 +165,17 @@ StatusType AVL_Tree<T>::insert(shared_ptr<TreeNode<T>> node) {
 template<class T>
 shared_ptr<TreeNode<T>> AVL_Tree<T>::search(shared_ptr<TreeNode<T>> node) {
     shared_ptr<TreeNode<T>> current = root;
+    shared_ptr<TreeNode<T>> temp_parent = nullptr;
     while (current != nullptr && *(current->data) != *(node->data)) {
         if (*(node->data) < *(current->data)) {
             current = current->left;
         } else {
             current = current->right;
         }
+        temp_parent = current->parent;
+    }
+    if (!current) {
+        return temp_parent;
     }
     return current;
 }
