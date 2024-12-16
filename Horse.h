@@ -11,6 +11,11 @@ private:
     int versionfollow;
     horse* follow;
 public:
+    ~horse() {
+        if(follow) {
+            delete follow;
+        }
+    }
     bool isVisited = false;
     bool isLead = false;
     int get_version();
@@ -35,16 +40,24 @@ public:
         return horse_id < other.horse_id;
     }
 
-    horse &operator=(const horse &other) {
+    horse& operator=(const horse &other) {
+        if (this == &other) {
+            return *this;  // Prevent self-assignment
+        }
+
         horse_id = other.horse_id;
         version = other.version;
         speed = other.speed;
         herd_id = other.herd_id;
         follow_id = other.follow_id;
         versionfollow = other.versionfollow;
-        follow = other.follow;
+
+        // If copying the follow, ensure deep copy or leave as shallow depending on use
+        follow = (other.follow) ? new horse(*other.follow) : nullptr;
+
         return *this;
     }
+
 
     bool operator==(const horse &other) const {
         return horse_id == other.horse_id;
