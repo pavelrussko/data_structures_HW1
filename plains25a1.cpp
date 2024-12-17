@@ -52,8 +52,7 @@ StatusType Plains::leave_herd(int horseId) {
     // Create a fake node for the horse
     horse horseToLeave(horseId);
     // Search for the horse
-    shared_ptr<TreeNode<horse>> horseNode = horses.search(
-            horse::make_horse_node(horseId));
+    shared_ptr<TreeNode<horse>> horseNode = horses.search(horse::make_horse_node(horseId));
     if (!horseNode || horseNode->data->get_herd_id() == -1) {
         return StatusType::FAILURE;
     }
@@ -103,7 +102,7 @@ StatusType Plains::join_herd(int horseId, int herdId) {
     if (!herdNode || herdNode->data->get_id() !=
                      herdId) {  // Herd not found in non-empty herds, check empty herds
         herdNode = empty_herds.search(herd::make_herd_node(herdId));
-        if (herdNode->data->get_id() != herdId) {  // Herd not found at all
+        if (!herdNode || herdNode->data->get_id() != herdId) {  // Herd not found at all
             return StatusType::FAILURE;
         }
     }
@@ -149,7 +148,7 @@ output_t<bool> Plains::leads(int horseId, int otherHorseId) {
     // If horses dont exist, return false
     if (followerNode->data->get_id() != horseId ||
         leaderNode->data->get_id() != otherHorseId) {
-        return false;
+        return StatusType::FAILURE;
     }
     // if horses arent in the same herd
     if (followerNode->data->get_herd_id() != leaderNode->data->get_herd_id()) {
