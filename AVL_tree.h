@@ -180,7 +180,7 @@ StatusType AVL_Tree<T>::removal(shared_ptr<TreeNode<T>> node) {
         return StatusType::FAILURE;
     }
     if (target == root && !target->left && !target->right) {
-        root.reset();
+        root = nullptr;
         return StatusType::SUCCESS;
     }
 

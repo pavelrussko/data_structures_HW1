@@ -25,23 +25,13 @@ StatusType Plains::remove_herd(int herdId) {
     // Check in empty_herds
     shared_ptr<TreeNode<herd>> emptyHerdNode = empty_herds.search(
             herd::make_herd_node(herdId));
-    if (emptyHerdNode) {
+    if (!emptyHerdNode || emptyHerdNode->data->get_id() == herdId) {
         empty_herds.removal(emptyHerdNode);
         return StatusType::SUCCESS;
     }
 
-    // Check in herds
-    shared_ptr<TreeNode<herd> > nonEmptyHerdNode = herds.search(
-            herd::make_herd_node(herdId));
-    if (nonEmptyHerdNode) {
-        if (!nonEmptyHerdNode->data->herd_horses.isEmpty()) {
-            return StatusType::FAILURE; // now allowed to remove a herd with horses
-        }
-        herds.removal(nonEmptyHerdNode);
-        return StatusType::SUCCESS;
-    }
 
-    return StatusType::FAILURE; // Herd not found at all
+    return StatusType::FAILURE;
 }
 
 StatusType Plains::leave_herd(int horseId) {
@@ -203,18 +193,15 @@ StatusType Plains::follow(int horseId, int horseToFollowId) {
         return StatusType::INVALID_INPUT;
     }
     //find horses
-    shared_ptr<TreeNode<horse>> follower = horses.search(
-            make_shared<TreeNode<horse>>(make_shared<horse>(horseId, 0)));
-    shared_ptr<TreeNode<horse>> toFollow = horses.search(
-            make_shared<TreeNode<horse>>(
-                    make_shared<horse>(horseToFollowId, 0)));
+    shared_ptr<TreeNode<horse>> follower = horses.search(horse::make_horse_node(horseId));
+    shared_ptr<TreeNode<horse>> toFollow = horses.search(horse::make_horse_node(horseToFollowId));
     //if horses dont exist
     if (follower->data->get_horse_id() != horseId ||
         toFollow->data->get_horse_id() != horseToFollowId) {
         return StatusType::FAILURE;
     }
     //if horses arent in the same herd
-    if (follower->data->get_herd_id() != toFollow->data->get_herd_id()) {
+    if (follower->data->get_herd_id() != toFollow->data->get_herd_id() || follower->data->get_herd_id() == -1 || toFollow->data->get_herd_id() == -1) {
         return StatusType::FAILURE;
     }
     //set follow
