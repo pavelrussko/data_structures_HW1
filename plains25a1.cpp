@@ -14,6 +14,7 @@ StatusType Plains::add_herd(int herdId) {
     }
 
     return empty_herds.insert(herd::make_herd_node(herdId));
+
 }
 
 StatusType Plains::remove_herd(int herdId) {

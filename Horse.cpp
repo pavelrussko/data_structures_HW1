@@ -3,9 +3,10 @@
 //
 #include "Horse.h"
 
-horse::horse(int horse_id, int speed) : horse_id(horse_id), version(0), speed(speed),
-                                        herd_id(-1), follow_id(-1),
-                                        versionfollow(0), follow(nullptr) {
+horse::horse(int horse_id, int speed)
+        : horse_id(horse_id), version(0), speed(speed),
+          herd_id(-1), follow_id(-1),
+          versionfollow(0), follow(weak_ptr<horse>()) {
     /*if (speed <= 0 || horse_id <= 0) {
         throw StatusType::INVALID_INPUT; //change it
     }*/
@@ -13,10 +14,10 @@ horse::horse(int horse_id, int speed) : horse_id(horse_id), version(0), speed(sp
 
 horse::horse(int horse_id) : horse_id(horse_id), version(0), speed(0),
                              herd_id(-1), follow_id(-1),
-                             versionfollow(0), follow(nullptr) {
-  /*  if (horse_id <= 0) {
-        throw StatusType::INVALID_INPUT; //change it
-    }*/
+                             versionfollow(0), follow(weak_ptr<horse>()) {
+    /*  if (horse_id <= 0) {
+          throw StatusType::INVALID_INPUT; //change it
+      }*/
 }
 
 int horse::get_version() {
@@ -44,7 +45,7 @@ int horse::get_versionfollow() {
 }
 
 shared_ptr<horse> horse::get_follow() {
-    return follow;
+    return follow.lock();
 }
 
 void horse::set_version(int version) {
@@ -71,6 +72,7 @@ void horse::set_follow(shared_ptr<horse> follow) {
 
 shared_ptr<TreeNode<horse>> horse::make_horse_node(int horse_id, int speed) {
     shared_ptr<horse> toInsert = make_shared<horse>(horse_id, speed);
-    shared_ptr<TreeNode<horse>> NodeToInsert = make_shared<TreeNode<horse>>(toInsert);
+    shared_ptr<TreeNode<horse>> NodeToInsert = make_shared<TreeNode<horse>>(
+            toInsert);
     return NodeToInsert;
 }
