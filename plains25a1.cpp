@@ -159,7 +159,7 @@ output_t<bool> Plains::leads(int horseId, int otherHorseId) {
         // Check for cycles
         if (currentHorse->isVisited) {
             // if cycle detected, reset all visited flags and return false for cycle detection
-            while (starter) {
+            while (starter && starter->isVisited) {
                 starter->isVisited = false;
                 starter = starter->get_follow();
             }
@@ -185,7 +185,7 @@ output_t<bool> Plains::leads(int horseId, int otherHorseId) {
     }
 
     // Reset all visited flags before returning
-    while (starter) {
+    while (starter && starter->isVisited) {
         starter->isVisited = false;
         starter = starter->get_follow();
     }
