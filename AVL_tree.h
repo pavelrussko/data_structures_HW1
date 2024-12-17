@@ -31,6 +31,7 @@ private:
 public:
     ~AVL_Tree();
     AVL_Tree();
+    int size = 0;
     StatusType insert(shared_ptr<TreeNode<T>>);
     shared_ptr<TreeNode<T>> search(shared_ptr<TreeNode<T>>);
     StatusType removal(shared_ptr<TreeNode<T>>);
@@ -68,6 +69,7 @@ AVL_Tree<T>::AVL_Tree(T data) {
     root = make_shared<TreeNode<T>>(
             make_shared<T>(data)); // Using make_shared for root node
     root->height = 1;
+    size = 1;
 }
 
 // Constructor for empty tree
@@ -96,6 +98,7 @@ StatusType AVL_Tree<T>::insert(shared_ptr<TreeNode<T>> node) {
         node->left = nullptr;
         node->right = nullptr;
         node->height = 1;
+        size++;
         return StatusType::SUCCESS;
     }
 
@@ -127,17 +130,21 @@ StatusType AVL_Tree<T>::insert(shared_ptr<TreeNode<T>> node) {
             if (BF > 1) {
                 if (get_BF(current->left) >= 0) {
                     LL_rotation(current);
+                    size++;
                     return StatusType::SUCCESS;
                 } else {
                     LR_rotation(current);
+                    size++;
                     return StatusType::SUCCESS;
                 }
             } else {
                 if (get_BF(current->right) <= 0) {
                     RR_rotation(current);
+                    size++;
                     return StatusType::SUCCESS;
                 } else {
                     RL_rotation(current);
+                    size++;
                     return StatusType::SUCCESS;
                 }
             }
@@ -146,6 +153,7 @@ StatusType AVL_Tree<T>::insert(shared_ptr<TreeNode<T>> node) {
         current = current->parent.lock();
     }
 
+    size++;
     return StatusType::SUCCESS;
 }
 
@@ -181,6 +189,7 @@ StatusType AVL_Tree<T>::removal(shared_ptr<TreeNode<T>> node) {
     }
     if (target == root && !target->left && !target->right) {
         root = nullptr;
+        size--;
         return StatusType::SUCCESS;
     }
 
@@ -233,7 +242,9 @@ StatusType AVL_Tree<T>::removal(shared_ptr<TreeNode<T>> node) {
         parent = parent->parent.lock();
     }
 
+    size--;
     return StatusType::SUCCESS;
+
 }
 
 // LL rotation function

@@ -17,6 +17,7 @@ private:
     weak_ptr<horse> follow;
 public:
     bool isVisited = false;
+    bool visited_local = false;
     bool isLead = false;
     int get_version();
     int get_horse_id();

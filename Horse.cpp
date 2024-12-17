@@ -4,7 +4,7 @@
 #include "Horse.h"
 
 horse::horse(int horse_id, int speed)
-        : horse_id(horse_id), version(0), speed(speed),
+        : horse_id(horse_id), version(horse_id), speed(speed),
           herd_id(-1), follow_id(-1),
           versionfollow(0), follow(weak_ptr<horse>()) {
     /*if (speed <= 0 || horse_id <= 0) {
@@ -12,7 +12,7 @@ horse::horse(int horse_id, int speed)
     }*/
 }
 
-horse::horse(int horse_id) : horse_id(horse_id), version(0), speed(0),
+horse::horse(int horse_id) : horse_id(horse_id), version(horse_id), speed(0),
                              herd_id(-1), follow_id(-1),
                              versionfollow(0), follow(weak_ptr<horse>()) {
     /*  if (horse_id <= 0) {

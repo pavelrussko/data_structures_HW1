@@ -43,6 +43,8 @@ public:
 
     output_t<int> get_speed(int horseId);
 
+    void resetVisitedLocal(shared_ptr<TreeNode<horse>> node);
+
     output_t<bool> leads(int horseId, int otherHorseId);
 
     output_t<bool> can_run_together(int herdId);

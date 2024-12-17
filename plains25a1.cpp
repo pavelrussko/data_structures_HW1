@@ -25,7 +25,10 @@ StatusType Plains::remove_herd(int herdId) {
     // Check in empty_herds
     shared_ptr<TreeNode<herd>> emptyHerdNode = empty_herds.search(
             herd::make_herd_node(herdId));
-    if (!emptyHerdNode || emptyHerdNode->data->get_id() == herdId) {
+    if(!emptyHerdNode || emptyHerdNode->data->get_id() != herdId){
+        return StatusType::FAILURE;
+    }
+    if (emptyHerdNode || emptyHerdNode->data->get_id() == herdId) {
         empty_herds.removal(emptyHerdNode);
         return StatusType::SUCCESS;
     }
@@ -258,7 +261,49 @@ void Plains::resetVisitedFlags(shared_ptr<TreeNode<horse>> node) {
     resetVisitedFlags(node->right);
 }
 
-bool Plains::traversal(shared_ptr<TreeNode<horse>> node,
+void Plains::resetVisitedLocal(shared_ptr<TreeNode<horse>> node) {
+    if (!node) {
+        return;
+    }
+    node->data->visited_local = false;
+    resetVisitedLocal(node->left);
+    resetVisitedLocal(node->right);
+}
+
+bool Plains::traversal(shared_ptr<TreeNode<horse>> node, shared_ptr<horse> &potential_leader) {
+    if(!node){
+        return true;
+    }
+    shared_ptr<horse> current = node->data;
+    shared_ptr<TreeNode<horse>> temp = node;
+    while(current->get_follow() && current && current->get_follow()->get_version() == current->get_versionfollow() && !current->isVisited && !current->visited_local){
+        current->isVisited = true;
+        current->visited_local = true;
+        current = current->get_follow();
+    }
+    if(current->visited_local){
+        resetVisitedLocal(temp);
+        return false;
+    } else if(current->isVisited){
+        resetVisitedLocal(temp);
+        return true;
+    } else if(!potential_leader){
+        potential_leader = current;
+        resetVisitedLocal(temp);
+    } else if(current == potential_leader){
+        resetVisitedLocal(temp);
+        return true;
+    } else{
+        resetVisitedLocal(temp);
+        return false;
+    }
+
+
+
+    return traversal(node->left, potential_leader) && traversal(node->right, potential_leader);
+}
+
+/*bool Plains::traversal(shared_ptr<TreeNode<horse>> node,
                        shared_ptr<horse> &potential_leader) {
     if (!node) {
         return true; // Base case: no horse in this subtree.
@@ -298,4 +343,4 @@ bool Plains::traversal(shared_ptr<TreeNode<horse>> node,
     // Recur for left and right children of the current node.
     return traversal(node->left, potential_leader) &&
            traversal(node->right, potential_leader);
-}
+}*/
