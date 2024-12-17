@@ -83,6 +83,9 @@ StatusType Plains::leave_herd(int horseId) {
 }
 
 StatusType Plains::add_horse(int horseId, int speed) {
+    if (horseId <= 0 || speed <= 0) {
+        return StatusType::INVALID_INPUT;
+    }
     shared_ptr<horse> horseToInsert = make_shared<horse>(horseId, speed);
     shared_ptr<TreeNode<horse>> NodeToInsert = make_shared<TreeNode<horse>>(
             horseToInsert);
@@ -130,8 +133,11 @@ StatusType Plains::join_herd(int horseId, int herdId) {
 }
 
 output_t<bool> Plains::leads(int horseId, int otherHorseId) {
+    if (horseId == otherHorseId) {
+        return StatusType::INVALID_INPUT;
+    }
     if (horseId <= 0 || otherHorseId <= 0) {
-        return false; // Invalid input check
+        return StatusType::INVALID_INPUT; // Invalid input check
     }
     // Search for the follower and leader in the AVL tree
     shared_ptr<TreeNode<horse>> followerNode = horses.search(
