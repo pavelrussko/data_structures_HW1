@@ -285,9 +285,14 @@ bool Plains::traversal(shared_ptr<TreeNode<horse>> node,
     }
     shared_ptr<horse> current = node->data;
     shared_ptr<TreeNode<horse>> temp = node;
-    while (current->get_follow() && current &&
-           current->get_follow()->get_version() == current->get_versionfollow()
+    while (current->get_follow() && current
            && !current->isVisited && !current->visited_local) {
+        if (current->get_follow()->get_version() !=
+            current->get_versionfollow()) {
+            current->isVisited = true;
+            resetVisitedLocal(temp);
+            break;
+        }
         current->visited_local = true;
         current->isVisited = true;
         current = current->get_follow();
@@ -311,7 +316,7 @@ bool Plains::traversal(shared_ptr<TreeNode<horse>> node,
     } else if (current == potential_leader) {
         resetVisitedLocal(temp);
 //        return true;
-    } else {
+    } else if (current != potential_leader) {
         resetVisitedLocal(temp);
         valid_lead = false;
 //        return false;
