@@ -25,7 +25,7 @@ public:
     int get_herd_id();
     int get_follow_id();
     int get_versionfollow();
-    shared_ptr<horse> get_follow();
+    weak_ptr<horse> get_follow();
     void set_version(int version);
     void set_herd_id(int herd_id);
     void set_follow_id(int follow_id);

@@ -66,7 +66,7 @@ StatusType Plains::leave_herd(int horseId) {
 
     // Remove the horse from the herd
     herdNode->data->herd_horses.removal(horseNode);
-    horseNode->data->get_follow() = nullptr;
+    horseNode->data->get_follow().lock() = nullptr;
     horseNode->data->set_version(horseNode->data->get_version() + 1);
     horseNode->data->set_herd_id(-1);
 
@@ -143,7 +143,6 @@ output_t<bool> Plains::leads(int horseId, int otherHorseId) {
     shared_ptr<TreeNode<horse>> leaderNode = horses.search(
             horse::make_horse_node(otherHorseId));
 
-
     // If horses dont exist, return false
     if (followerNode->data->get_id() != horseId ||
         leaderNode->data->get_id() != otherHorseId) {
@@ -165,7 +164,7 @@ output_t<bool> Plains::leads(int horseId, int otherHorseId) {
             // if cycle detected, reset all visited flags and return false for cycle detection
             while (starter && starter->isVisited) {
                 starter->isVisited = false;
-                starter = starter->get_follow();
+                starter = starter->get_follow().lock();
             }
             return false; // Cycle detected, return false
         }
@@ -178,20 +177,22 @@ output_t<bool> Plains::leads(int horseId, int otherHorseId) {
             foundLeader = true;
             break;
         }
-        if (currentHorse->get_follow() == nullptr) {//no more potential leaders
+        if (!currentHorse->get_follow().lock()) {//no more potential leaders
             break;
         }
         // Move to the next horse in the chain
         if (currentHorse->get_versionfollow() ==
-            currentHorse->get_follow()->get_version()) {
-            currentHorse = currentHorse->get_follow();
+            currentHorse->get_follow().lock()->get_version()) {
+            currentHorse = currentHorse->get_follow().lock();
+        } else {
+            break;
         }
     }
 
     // Reset all visited flags before returning
     while (starter && starter->isVisited) {
         starter->isVisited = false;
-        starter = starter->get_follow();
+        starter = starter->get_follow().lock();
     }
     return foundLeader;
 }
@@ -254,11 +255,12 @@ output_t<bool> Plains::can_run_together(int herdId) {
     //setting up for traversal with starting point
     shared_ptr<horse> potential_leader = nullptr;
     shared_ptr<TreeNode<horse>> current_horse = herdNode->data->herd_horses.getRoot();
+    //theres only one horse in the tree in the herd.
     if (!current_horse->left && !current_horse->right) {
         return true;
     }
     // Run traversal to check if all horses lead to the same leader.
-    bool result = traversal(current_horse, potential_leader);
+    bool result = traversal(current_horse, potential_leader, current_horse);
 
     // Reset visited flags for future calls (optional; depends on usage).
     resetVisitedFlags(current_horse);
@@ -286,55 +288,95 @@ void Plains::resetVisitedLocal(shared_ptr<TreeNode<horse>> node) {
 }
 
 bool Plains::traversal(shared_ptr<TreeNode<horse>> node,
-                       shared_ptr<horse> &potential_leader) {
+                       shared_ptr<horse> &potential_leader,
+                       shared_ptr<TreeNode<horse>> root) {
     if (!node) {
         return true;
-    }
-    shared_ptr<horse> current = node->data;
-    shared_ptr<TreeNode<horse>> temp = node;
-    while (current && !current->isVisited && !current->visited_local) {
-
-        if (current->get_follow() && current->get_follow()->get_version() !=
-                                     current->get_versionfollow()) {
-            current->isVisited = true;
-            resetVisitedLocal(temp);
-            break;
+    } else {
+        shared_ptr<horse> current = node->data;
+        while (current->get_follow().lock() && current->get_versionfollow() ==
+                                               current->get_follow().lock()->get_version()) {
+            if (current->visited_local) {//if we visited in a previous traversal, we can break
+                resetVisitedLocal(root);
+                return false;
+            } else if (current->isVisited) {//if we already visited in the same traversal, thers loop
+                break;
+            } else {
+                //we check if versions match.
+                current->visited_local = true;
+                current->isVisited = true;
+                current = current->get_follow().lock();
+            }
         }
-        current->visited_local = true;
-        current->isVisited = true;
-        if (current->get_follow()) {
-            current = current->get_follow();
+        if (!potential_leader) {
+            potential_leader = current;
         } else {
-            break;
+            if (current->isVisited) {
+                resetVisitedLocal(root);
+                return traversal(node->left, potential_leader, root) &&
+                       traversal(node->right, potential_leader, root);
+            }
+            if (current != potential_leader) {
+                return false;
+            }
         }
-//        current = current->get_fllow();
-//        current->isVisited = true;
-//        current->visited_local = true;
+        resetVisitedLocal(root);
+        return traversal(node->left, potential_leader, root) &&
+               traversal(node->right, potential_leader, root);
     }
-    bool valid_lead = true;
-    if (current->visited_local) {
-        valid_lead = false;
-//        return false;
-    } else if (current->isVisited) {
-        resetVisitedLocal(temp);
-//        return true;
-    } else if (!potential_leader) {
-        potential_leader = current;
-        current->isVisited = true;
-        //current->isVisited = true; ???
-    } else if (current != potential_leader) {
-        valid_lead = false;
-//        return false;
-    }
-    resetVisitedLocal(temp);
-    bool left_valid = traversal(node->left, potential_leader);
-    resetVisitedLocal(temp);
-    bool right_valid = traversal(node->right, potential_leader);
-//    return traversal(node->left, potential_leader) &&
-//           traversal(node->right, potential_leader);
-//}
-    return valid_lead && left_valid && right_valid;
 }
+
+//bool Plains::traversal(shared_ptr<TreeNode<horse>> node,
+//                       shared_ptr<horse> &potential_leader) {
+//    if (!node) {
+//        return true;
+//    }
+//    shared_ptr<horse> current = node->data;
+//    shared_ptr<TreeNode<horse>> temp = node;
+//    while (current && !current->isVisited && !current->visited_local) {
+//
+//        if (current->get_follow().lock() &&
+//            current->get_follow().lock()->get_version() !=
+//            current->get_versionfollow()) {
+//            current->isVisited = true;
+//            resetVisitedLocal(temp);
+//            break;
+//        }
+//        current->visited_local = true;
+//        current->isVisited = true;
+//        if (current->get_follow().lock()) {
+//            current = current->get_follow().lock();
+//        } else {
+//            break;
+//        }
+////        current = current->get_fllow();
+////        current->isVisited = true;
+////        current->visited_local = true;
+//    }
+//    bool valid_lead = true;
+//    if (current->visited_local) {
+//        valid_lead = false;
+////        return false;
+//    } else if (current->isVisited) {
+//        resetVisitedLocal(temp);
+////        return true;
+//    } else if (!potential_leader) {
+//        potential_leader = current;
+//        current->isVisited = true;
+//        //current->isVisited = true; ???
+//    } else if (current != potential_leader) {
+//        valid_lead = false;
+////        return false;
+//    }
+//    resetVisitedLocal(temp);
+//    bool left_valid = traversal(node->left, potential_leader);
+//    resetVisitedLocal(temp);
+//    bool right_valid = traversal(node->right, potential_leader);
+////    return traversal(node->left, potential_leader) &&
+////           traversal(node->right, potential_leader);
+////}
+//    return valid_lead && left_valid && right_valid;
+//}
 /*bool Plains::traversal(shared_ptr<TreeNode<horse>> node,
                        shared_ptr<horse> &potential_leader) {
     if (!node) {

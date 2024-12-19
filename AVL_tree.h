@@ -257,7 +257,7 @@ void AVL_Tree<T>::LL_rotation(shared_ptr<TreeNode<T>> node) {
     node->left = temp;
     if (temp != nullptr) {
         temp->parent = node;
-    }
+    }// child is A, node is B and temp is AR
     child->parent = node->parent;
     child->right = node;
     node->parent = child;

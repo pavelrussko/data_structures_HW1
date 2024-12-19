@@ -50,7 +50,8 @@ public:
     output_t<bool> can_run_together(int herdId);
     // } </DO-NOT-MODIFY>
     bool traversal(shared_ptr<TreeNode<horse>> node,
-                   shared_ptr<horse> &potential_leader);
+                   shared_ptr<horse> &potential_leader,
+                   shared_ptr<TreeNode<horse>> root);
     void resetVisitedFlags(shared_ptr<TreeNode<horse>> node);
 };
 

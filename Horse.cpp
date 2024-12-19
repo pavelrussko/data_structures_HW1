@@ -44,8 +44,8 @@ int horse::get_versionfollow() {
     return versionfollow;
 }
 
-shared_ptr<horse> horse::get_follow() {
-    return follow.lock();
+weak_ptr<horse> horse::get_follow() {
+    return follow;
 }
 
 void horse::set_version(int version) {
