@@ -272,6 +272,7 @@ void Plains::resetVisitedFlags(shared_ptr<TreeNode<horse>> node) {
     resetVisitedFlags(node->left);
     resetVisitedFlags(node->right);
 }
+//gg
 
 void Plains::resetVisitedLocal(shared_ptr<TreeNode<horse>> node) {
     if (!node) {
