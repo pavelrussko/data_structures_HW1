@@ -254,7 +254,9 @@ output_t<bool> Plains::can_run_together(int herdId) {
     //setting up for traversal with starting point
     shared_ptr<horse> potential_leader = nullptr;
     shared_ptr<TreeNode<horse>> current_horse = herdNode->data->herd_horses.getRoot();
-
+    if (!current_horse->left && !current_horse->right) {
+        return true;
+    }
     // Run traversal to check if all horses lead to the same leader.
     bool result = traversal(current_horse, potential_leader);
 
